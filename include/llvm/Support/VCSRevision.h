@@ -1,2 +1,2 @@
-#define LLVM_REVISION "85305eaf1e90ff529d304abac8a979e1d967f0a2"
-#define LLVM_REPOSITORY "/usr/local/google/buildbot/src/android/llvm-toolchain/toolchain/llvm-project/llvm"
+#define LLVM_REVISION "888a58ee8d6fb1670e1728abe3c37806249dfbcf"
+#define LLVM_REPOSITORY "/buildbot/tmp/tmpq_x7QC"

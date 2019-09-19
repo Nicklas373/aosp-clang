@@ -1146,6 +1146,7 @@
     arm_dmb,                                   // llvm.arm.dmb
     arm_dsb,                                   // llvm.arm.dsb
     arm_get_fpscr,                             // llvm.arm.get.fpscr
+    arm_gnu_eabi_mcount,                       // llvm.arm.gnu.eabi.mcount
     arm_hint,                                  // llvm.arm.hint
     arm_isb,                                   // llvm.arm.isb
     arm_ldaex,                                 // llvm.arm.ldaex

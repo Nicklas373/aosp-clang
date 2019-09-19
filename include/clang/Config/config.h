@@ -61,7 +61,7 @@
 #define CLANG_HAVE_RLIMITS 1
 
 /* The LLVM product name and version */
-#define BACKEND_PACKAGE_STRING "LLVM 9.0.6svn"
+#define BACKEND_PACKAGE_STRING "LLVM 9.0.7svn"
 
 /* Linker version detected at compile time. */
 /* #undef HOST_LINK_VERSION */

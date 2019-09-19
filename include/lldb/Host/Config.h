@@ -13,7 +13,7 @@
 
 #define LLDB_EDITLINE_USE_WCHAR 0
 
-#define LLDB_HAVE_EL_RFUNC_T 0
+#define LLDB_HAVE_EL_RFUNC_T 1
 
 /* #undef LLDB_DISABLE_POSIX */
 
