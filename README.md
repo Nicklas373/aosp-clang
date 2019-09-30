@@ -5,3 +5,4 @@ This is only cloned prebuilt Clang by Google, just grab it on specific branch if
 # Current Branch:
                 - Clang 9.0.6 r365631  (build 5821526) Build 20190827 (GMT+7)
                 - Clang 9.0.7 r365631b (build 5873035) Build 20190919 (GMT+7)
+                - Clang 9.0.8 r365631c (build 5900059) Build 20190930 (GMT+7)
