@@ -31,6 +31,7 @@ NoInline,
 NoRecurse,
 NoRedZone,
 NoReturn,
+NoSync,
 NoUnwind,
 NonLazyBind,
 NonNull,
@@ -45,6 +46,7 @@ SExt,
 SafeStack,
 SanitizeAddress,
 SanitizeHWAddress,
+SanitizeMemTag,
 SanitizeMemory,
 SanitizeThread,
 ShadowCallStack,
@@ -98,6 +100,7 @@ static Attribute::AttrKind getAttrKindFromName(StringRef AttrName) {
     .Case("norecurse", Attribute::NoRecurse)
     .Case("noredzone", Attribute::NoRedZone)
     .Case("noreturn", Attribute::NoReturn)
+    .Case("nosync", Attribute::NoSync)
     .Case("nounwind", Attribute::NoUnwind)
     .Case("nonlazybind", Attribute::NonLazyBind)
     .Case("nonnull", Attribute::NonNull)
@@ -112,6 +115,7 @@ static Attribute::AttrKind getAttrKindFromName(StringRef AttrName) {
     .Case("safestack", Attribute::SafeStack)
     .Case("sanitize_address", Attribute::SanitizeAddress)
     .Case("sanitize_hwaddress", Attribute::SanitizeHWAddress)
+    .Case("sanitize_memtag", Attribute::SanitizeMemTag)
     .Case("sanitize_memory", Attribute::SanitizeMemory)
     .Case("sanitize_thread", Attribute::SanitizeThread)
     .Case("shadowcallstack", Attribute::ShadowCallStack)
@@ -319,6 +323,11 @@ struct NoReturnAttr : EnumAttr {
     return llvm::Attribute::NoReturn;
   }
 };
+struct NoSyncAttr : EnumAttr {
+  static enum Attribute::AttrKind getKind() {
+    return llvm::Attribute::NoSync;
+  }
+};
 struct NoUnwindAttr : EnumAttr {
   static enum Attribute::AttrKind getKind() {
     return llvm::Attribute::NoUnwind;
@@ -387,6 +396,11 @@ struct SanitizeAddressAttr : EnumAttr {
 struct SanitizeHWAddressAttr : EnumAttr {
   static enum Attribute::AttrKind getKind() {
     return llvm::Attribute::SanitizeHWAddress;
+  }
+};
+struct SanitizeMemTagAttr : EnumAttr {
+  static enum Attribute::AttrKind getKind() {
+    return llvm::Attribute::SanitizeMemTag;
   }
 };
 struct SanitizeMemoryAttr : EnumAttr {
@@ -515,6 +529,7 @@ static inline bool hasCompatibleFnAttrs(const Function &Caller,
   Ret &= isEqual<SanitizeThreadAttr>(Caller, Callee);
   Ret &= isEqual<SanitizeMemoryAttr>(Caller, Callee);
   Ret &= isEqual<SanitizeHWAddressAttr>(Caller, Callee);
+  Ret &= isEqual<SanitizeMemTagAttr>(Caller, Callee);
   Ret &= isEqual<SafeStackAttr>(Caller, Callee);
   Ret &= isEqual<ShadowCallStackAttr>(Caller, Callee);
 
@@ -523,6 +538,7 @@ static inline bool hasCompatibleFnAttrs(const Function &Caller,
 
 static inline void mergeFnAttrs(Function &Caller,
                                 const Function &Callee) {
+  setAND<UnsafeFPMathAttr>(Caller, Callee);
   setOR<NoImplicitFloatAttr>(Caller, Callee);
   setOR<NoJumpTablesAttr>(Caller, Callee);
   setOR<ProfileSampleAccurateAttr>(Caller, Callee);
@@ -535,7 +551,6 @@ static inline void mergeFnAttrs(Function &Caller,
   setAND<LessPreciseFPMADAttr>(Caller, Callee);
   setAND<NoInfsFPMathAttr>(Caller, Callee);
   setAND<NoNansFPMathAttr>(Caller, Callee);
-  setAND<UnsafeFPMathAttr>(Caller, Callee);
 }
 
 #endif

@@ -288,6 +288,15 @@
         return 2;
     break;
   }
+  case AT_CFICanonicalJumpTable: {
+    if (Name == "cfi_canonical_jump_table" && SyntaxUsed == 0 && Scope == "")
+        return 0;
+    if (Name == "cfi_canonical_jump_table" && SyntaxUsed == 1 && Scope == "clang")
+        return 1;
+    if (Name == "cfi_canonical_jump_table" && SyntaxUsed == 2 && Scope == "clang")
+        return 2;
+    break;
+  }
   case AT_CFReturnsNotRetained: {
     if (Name == "cf_returns_not_retained" && SyntaxUsed == 0 && Scope == "")
         return 0;
@@ -607,6 +616,10 @@
         return 1;
     if (Name == "fallthrough" && SyntaxUsed == 1 && Scope == "clang")
         return 2;
+    if (Name == "fallthrough" && SyntaxUsed == 0 && Scope == "")
+        return 3;
+    if (Name == "fallthrough" && SyntaxUsed == 1 && Scope == "gnu")
+        return 4;
     break;
   }
   case AT_FastCall: {
@@ -1520,6 +1533,11 @@
         return 2;
     break;
   }
+  case AT_Owner: {
+    if (Name == "Owner" && SyntaxUsed == 1 && Scope == "gsl")
+        return 0;
+    break;
+  }
   case AT_Ownership: {
     if (Name == "ownership_holds" && SyntaxUsed == 0 && Scope == "")
         return 0;
@@ -1588,6 +1606,11 @@
         return 0;
     if (Name == "pcs" && SyntaxUsed == 1 && Scope == "gnu")
         return 1;
+    break;
+  }
+  case AT_Pointer: {
+    if (Name == "Pointer" && SyntaxUsed == 1 && Scope == "gsl")
+        return 0;
     break;
   }
   case AT_PragmaClangBSSSection: {

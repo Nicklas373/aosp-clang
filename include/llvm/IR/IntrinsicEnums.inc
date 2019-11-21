@@ -30,6 +30,9 @@
     convert_to_fp16,                           // llvm.convert.to.fp16
     copysign,                                  // llvm.copysign
     coro_alloc,                                // llvm.coro.alloc
+    coro_alloca_alloc,                         // llvm.coro.alloca.alloc
+    coro_alloca_free,                          // llvm.coro.alloca.free
+    coro_alloca_get,                           // llvm.coro.alloca.get
     coro_begin,                                // llvm.coro.begin
     coro_destroy,                              // llvm.coro.destroy
     coro_done,                                 // llvm.coro.done
@@ -37,14 +40,18 @@
     coro_frame,                                // llvm.coro.frame
     coro_free,                                 // llvm.coro.free
     coro_id,                                   // llvm.coro.id
+    coro_id_retcon,                            // llvm.coro.id.retcon
+    coro_id_retcon_once,                       // llvm.coro.id.retcon.once
     coro_noop,                                 // llvm.coro.noop
     coro_param,                                // llvm.coro.param
+    coro_prepare_retcon,                       // llvm.coro.prepare.retcon
     coro_promise,                              // llvm.coro.promise
     coro_resume,                               // llvm.coro.resume
     coro_save,                                 // llvm.coro.save
     coro_size,                                 // llvm.coro.size
     coro_subfn_addr,                           // llvm.coro.subfn.addr
     coro_suspend,                              // llvm.coro.suspend
+    coro_suspend_retcon,                       // llvm.coro.suspend.retcon
     cos,                                       // llvm.cos
     ctlz,                                      // llvm.ctlz
     ctpop,                                     // llvm.ctpop
@@ -82,6 +89,8 @@
     experimental_constrained_fma,              // llvm.experimental.constrained.fma
     experimental_constrained_fmul,             // llvm.experimental.constrained.fmul
     experimental_constrained_fpext,            // llvm.experimental.constrained.fpext
+    experimental_constrained_fptosi,           // llvm.experimental.constrained.fptosi
+    experimental_constrained_fptoui,           // llvm.experimental.constrained.fptoui
     experimental_constrained_fptrunc,          // llvm.experimental.constrained.fptrunc
     experimental_constrained_frem,             // llvm.experimental.constrained.frem
     experimental_constrained_fsub,             // llvm.experimental.constrained.fsub
@@ -133,6 +142,7 @@
     gcwrite,                                   // llvm.gcwrite
     get_dynamic_area_offset,                   // llvm.get.dynamic.area.offset
     hwasan_check_memaccess,                    // llvm.hwasan.check.memaccess
+    hwasan_check_memaccess_shortgranules,      // llvm.hwasan.check.memaccess.shortgranules
     icall_branch_funnel,                       // llvm.icall.branch.funnel
     init_trampoline,                           // llvm.init.trampoline
     instrprof_increment,                       // llvm.instrprof.increment
@@ -214,6 +224,7 @@
     preserve_struct_access_index,              // llvm.preserve.struct.access.index
     preserve_union_access_index,               // llvm.preserve.union.access.index
     ptr_annotation,                            // llvm.ptr.annotation
+    ptrmask,                                   // llvm.ptrmask
     read_register,                             // llvm.read_register
     readcyclecounter,                          // llvm.readcyclecounter
     returnaddress,                             // llvm.returnaddress
@@ -285,10 +296,12 @@
     aarch64_crypto_sha256su1,                  // llvm.aarch64.crypto.sha256su1
     aarch64_dmb,                               // llvm.aarch64.dmb
     aarch64_dsb,                               // llvm.aarch64.dsb
+    aarch64_fjcvtzs,                           // llvm.aarch64.fjcvtzs
     aarch64_get_fpcr,                          // llvm.aarch64.get.fpcr
     aarch64_gmi,                               // llvm.aarch64.gmi
     aarch64_hint,                              // llvm.aarch64.hint
     aarch64_irg,                               // llvm.aarch64.irg
+    aarch64_irg_sp,                            // llvm.aarch64.irg.sp
     aarch64_isb,                               // llvm.aarch64.isb
     aarch64_ldaxp,                             // llvm.aarch64.ldaxp
     aarch64_ldaxr,                             // llvm.aarch64.ldaxr
@@ -453,15 +466,24 @@
     aarch64_neon_vsli,                         // llvm.aarch64.neon.vsli
     aarch64_neon_vsri,                         // llvm.aarch64.neon.vsri
     aarch64_sdiv,                              // llvm.aarch64.sdiv
+    aarch64_settag,                            // llvm.aarch64.settag
+    aarch64_settag_zero,                       // llvm.aarch64.settag.zero
     aarch64_sisd_fabd,                         // llvm.aarch64.sisd.fabd
     aarch64_sisd_fcvtxn,                       // llvm.aarch64.sisd.fcvtxn
     aarch64_space,                             // llvm.aarch64.space
     aarch64_stg,                               // llvm.aarch64.stg
+    aarch64_stgp,                              // llvm.aarch64.stgp
     aarch64_stlxp,                             // llvm.aarch64.stlxp
     aarch64_stlxr,                             // llvm.aarch64.stlxr
     aarch64_stxp,                              // llvm.aarch64.stxp
     aarch64_stxr,                              // llvm.aarch64.stxr
     aarch64_subp,                              // llvm.aarch64.subp
+    aarch64_sve_fcvtzs_i32f16,                 // llvm.aarch64.sve.fcvtzs.i32f16
+    aarch64_tagp,                              // llvm.aarch64.tagp
+    aarch64_tcancel,                           // llvm.aarch64.tcancel
+    aarch64_tcommit,                           // llvm.aarch64.tcommit
+    aarch64_tstart,                            // llvm.aarch64.tstart
+    aarch64_ttest,                             // llvm.aarch64.ttest
     aarch64_udiv,                              // llvm.aarch64.udiv
     amdgcn_alignbit,                           // llvm.amdgcn.alignbit
     amdgcn_alignbyte,                          // llvm.amdgcn.alignbyte
@@ -470,6 +492,7 @@
     amdgcn_buffer_atomic_add,                  // llvm.amdgcn.buffer.atomic.add
     amdgcn_buffer_atomic_and,                  // llvm.amdgcn.buffer.atomic.and
     amdgcn_buffer_atomic_cmpswap,              // llvm.amdgcn.buffer.atomic.cmpswap
+    amdgcn_buffer_atomic_fadd,                 // llvm.amdgcn.buffer.atomic.fadd
     amdgcn_buffer_atomic_or,                   // llvm.amdgcn.buffer.atomic.or
     amdgcn_buffer_atomic_smax,                 // llvm.amdgcn.buffer.atomic.smax
     amdgcn_buffer_atomic_smin,                 // llvm.amdgcn.buffer.atomic.smin
@@ -531,6 +554,7 @@
     amdgcn_fract,                              // llvm.amdgcn.fract
     amdgcn_frexp_exp,                          // llvm.amdgcn.frexp.exp
     amdgcn_frexp_mant,                         // llvm.amdgcn.frexp.mant
+    amdgcn_global_atomic_fadd,                 // llvm.amdgcn.global.atomic.fadd
     amdgcn_groupstaticsize,                    // llvm.amdgcn.groupstaticsize
     amdgcn_icmp,                               // llvm.amdgcn.icmp
     amdgcn_if,                                 // llvm.amdgcn.if
@@ -1035,6 +1059,8 @@
     amdgcn_mqsad_pk_u16_u8,                    // llvm.amdgcn.mqsad.pk.u16.u8
     amdgcn_mqsad_u32_u8,                       // llvm.amdgcn.mqsad.u32.u8
     amdgcn_msad_u8,                            // llvm.amdgcn.msad.u8
+    amdgcn_mul_i24,                            // llvm.amdgcn.mul.i24
+    amdgcn_mul_u24,                            // llvm.amdgcn.mul.u24
     amdgcn_permlane16,                         // llvm.amdgcn.permlane16
     amdgcn_permlanex16,                        // llvm.amdgcn.permlanex16
     amdgcn_ps_live,                            // llvm.amdgcn.ps.live
@@ -1043,6 +1069,8 @@
     amdgcn_raw_buffer_atomic_add,              // llvm.amdgcn.raw.buffer.atomic.add
     amdgcn_raw_buffer_atomic_and,              // llvm.amdgcn.raw.buffer.atomic.and
     amdgcn_raw_buffer_atomic_cmpswap,          // llvm.amdgcn.raw.buffer.atomic.cmpswap
+    amdgcn_raw_buffer_atomic_dec,              // llvm.amdgcn.raw.buffer.atomic.dec
+    amdgcn_raw_buffer_atomic_inc,              // llvm.amdgcn.raw.buffer.atomic.inc
     amdgcn_raw_buffer_atomic_or,               // llvm.amdgcn.raw.buffer.atomic.or
     amdgcn_raw_buffer_atomic_smax,             // llvm.amdgcn.raw.buffer.atomic.smax
     amdgcn_raw_buffer_atomic_smin,             // llvm.amdgcn.raw.buffer.atomic.smin
@@ -1091,9 +1119,12 @@
     amdgcn_set_inactive,                       // llvm.amdgcn.set.inactive
     amdgcn_sffbh,                              // llvm.amdgcn.sffbh
     amdgcn_sin,                                // llvm.amdgcn.sin
+    amdgcn_softwqm,                            // llvm.amdgcn.softwqm
     amdgcn_struct_buffer_atomic_add,           // llvm.amdgcn.struct.buffer.atomic.add
     amdgcn_struct_buffer_atomic_and,           // llvm.amdgcn.struct.buffer.atomic.and
     amdgcn_struct_buffer_atomic_cmpswap,       // llvm.amdgcn.struct.buffer.atomic.cmpswap
+    amdgcn_struct_buffer_atomic_dec,           // llvm.amdgcn.struct.buffer.atomic.dec
+    amdgcn_struct_buffer_atomic_inc,           // llvm.amdgcn.struct.buffer.atomic.inc
     amdgcn_struct_buffer_atomic_or,            // llvm.amdgcn.struct.buffer.atomic.or
     amdgcn_struct_buffer_atomic_smax,          // llvm.amdgcn.struct.buffer.atomic.smax
     amdgcn_struct_buffer_atomic_smin,          // llvm.amdgcn.struct.buffer.atomic.smin
@@ -3848,8 +3879,6 @@
     nvvm_atomic_exch_gen_i_sys,                // llvm.nvvm.atomic.exch.gen.i.sys
     nvvm_atomic_inc_gen_i_cta,                 // llvm.nvvm.atomic.inc.gen.i.cta
     nvvm_atomic_inc_gen_i_sys,                 // llvm.nvvm.atomic.inc.gen.i.sys
-    nvvm_atomic_load_add_f32,                  // llvm.nvvm.atomic.load.add.f32
-    nvvm_atomic_load_add_f64,                  // llvm.nvvm.atomic.load.add.f64
     nvvm_atomic_load_dec_32,                   // llvm.nvvm.atomic.load.dec.32
     nvvm_atomic_load_inc_32,                   // llvm.nvvm.atomic.load.inc.32
     nvvm_atomic_max_gen_i_cta,                 // llvm.nvvm.atomic.max.gen.i.cta
@@ -5732,10 +5761,12 @@
     s390_vscbiq,                               // llvm.s390.vscbiq
     s390_vsl,                                  // llvm.s390.vsl
     s390_vslb,                                 // llvm.s390.vslb
+    s390_vsld,                                 // llvm.s390.vsld
     s390_vsldb,                                // llvm.s390.vsldb
     s390_vsq,                                  // llvm.s390.vsq
     s390_vsra,                                 // llvm.s390.vsra
     s390_vsrab,                                // llvm.s390.vsrab
+    s390_vsrd,                                 // llvm.s390.vsrd
     s390_vsrl,                                 // llvm.s390.vsrl
     s390_vsrlb,                                // llvm.s390.vsrlb
     s390_vstl,                                 // llvm.s390.vstl
@@ -5752,6 +5783,12 @@
     s390_vstrczh,                              // llvm.s390.vstrczh
     s390_vstrczhs,                             // llvm.s390.vstrczhs
     s390_vstrl,                                // llvm.s390.vstrl
+    s390_vstrsb,                               // llvm.s390.vstrsb
+    s390_vstrsf,                               // llvm.s390.vstrsf
+    s390_vstrsh,                               // llvm.s390.vstrsh
+    s390_vstrszb,                              // llvm.s390.vstrszb
+    s390_vstrszf,                              // llvm.s390.vstrszf
+    s390_vstrszh,                              // llvm.s390.vstrszh
     s390_vsumb,                                // llvm.s390.vsumb
     s390_vsumgf,                               // llvm.s390.vsumgf
     s390_vsumgh,                               // llvm.s390.vsumgh
@@ -5786,10 +5823,15 @@
     wasm_memory_grow,                          // llvm.wasm.memory.grow
     wasm_memory_init,                          // llvm.wasm.memory.init
     wasm_memory_size,                          // llvm.wasm.memory.size
+    wasm_qfma,                                 // llvm.wasm.qfma
+    wasm_qfms,                                 // llvm.wasm.qfms
     wasm_rethrow_in_catch,                     // llvm.wasm.rethrow.in.catch
     wasm_sub_saturate_signed,                  // llvm.wasm.sub.saturate.signed
     wasm_sub_saturate_unsigned,                // llvm.wasm.sub.saturate.unsigned
     wasm_throw,                                // llvm.wasm.throw
+    wasm_tls_align,                            // llvm.wasm.tls.align
+    wasm_tls_base,                             // llvm.wasm.tls.base
+    wasm_tls_size,                             // llvm.wasm.tls.size
     wasm_trunc_saturate_signed,                // llvm.wasm.trunc.saturate.signed
     wasm_trunc_saturate_unsigned,              // llvm.wasm.trunc.saturate.unsigned
     x86_3dnow_pavgusb,                         // llvm.x86.3dnow.pavgusb

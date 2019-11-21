@@ -1693,7 +1693,8 @@ public:
     return false;
   }
 
-  /// Produce RHS description of parameter's loading instruction \p MI.
+  /// Produce the expression describing the \p MI loading a value into
+  /// the parameter's forwarding register.
   virtual Optional<ParamLoadedValue>
   describeLoadedValue(const MachineInstr &MI) const;
 

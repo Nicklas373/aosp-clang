@@ -340,6 +340,13 @@ Record.push_back(SA->getType());
     Record.push_back(A->getSpellingListIndex());
     break;
   }
+  case attr::CFICanonicalJumpTable: {
+    const auto *SA = cast<CFICanonicalJumpTableAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->getSpellingListIndex());
+    break;
+  }
   case attr::CFReturnsNotRetained: {
     const auto *SA = cast<CFReturnsNotRetainedAttr>(A);
     Record.push_back(SA->isInherited());
@@ -1243,6 +1250,7 @@ Record.push_back(SA->getBranchState());
     Record.push_back(A->isImplicit());
     Record.push_back(A->getSpellingListIndex());
 Record.push_back(SA->getMapType());
+Record.push_back(SA->getDevType());
     break;
   }
   case attr::OMPReferencedVar: {
@@ -1541,6 +1549,14 @@ Record.push_back(SA->getFamily());
     Record.push_back(A->getSpellingListIndex());
     break;
   }
+  case attr::Owner: {
+    const auto *SA = cast<OwnerAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->getSpellingListIndex());
+    Record.AddTypeSourceInfo(SA->getDerefTypeLoc());
+    break;
+  }
   case attr::Ownership: {
     const auto *SA = cast<OwnershipAttr>(A);
     Record.push_back(SA->isInherited());
@@ -1588,6 +1604,14 @@ Record.push_back(SA->getParamState());
     Record.push_back(A->isImplicit());
     Record.push_back(A->getSpellingListIndex());
 Record.push_back(SA->getPCS());
+    break;
+  }
+  case attr::Pointer: {
+    const auto *SA = cast<PointerAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(A->getSpellingListIndex());
+    Record.AddTypeSourceInfo(SA->getDerefTypeLoc());
     break;
   }
   case attr::PragmaClangBSSSection: {
@@ -2054,6 +2078,7 @@ Record.push_back(SA->getVisibility());
     Record.push_back(SA->isInherited());
     Record.push_back(A->isImplicit());
     Record.push_back(A->getSpellingListIndex());
+    Record.AddString(SA->getMessage());
     break;
   }
   case attr::Weak: {

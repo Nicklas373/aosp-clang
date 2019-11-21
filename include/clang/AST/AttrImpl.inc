@@ -1760,6 +1760,48 @@ const char *CFConsumedAttr::getSpelling() const {
   }
 }
 
+CFICanonicalJumpTableAttr *CFICanonicalJumpTableAttr::clone(ASTContext &C) const {
+  auto *A = new (C) CFICanonicalJumpTableAttr(getLocation(), C, getSpellingListIndex());
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->Implicit = Implicit;
+  return A;
+}
+
+void CFICanonicalJumpTableAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (SpellingListIndex) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((cfi_canonical_jump_table))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::cfi_canonical_jump_table]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::cfi_canonical_jump_table]]";
+    break;
+  }
+}
+}
+
+const char *CFICanonicalJumpTableAttr::getSpelling() const {
+  switch (SpellingListIndex) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "cfi_canonical_jump_table";
+  case 1:
+    return "cfi_canonical_jump_table";
+  case 2:
+    return "cfi_canonical_jump_table";
+  }
+}
+
 CFReturnsNotRetainedAttr *CFReturnsNotRetainedAttr::clone(ASTContext &C) const {
   auto *A = new (C) CFReturnsNotRetainedAttr(getLocation(), C, getSpellingListIndex());
   A->Inherited = Inherited;
@@ -3413,6 +3455,14 @@ void FallThroughAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy)
     OS << " [[clang::fallthrough]]";
     break;
   }
+  case 3 : {
+    OS << " __attribute__((fallthrough))";
+    break;
+  }
+  case 4 : {
+    OS << " [[gnu::fallthrough]]";
+    break;
+  }
 }
 }
 
@@ -3426,6 +3476,10 @@ const char *FallThroughAttr::getSpelling() const {
   case 1:
     return "fallthrough";
   case 2:
+    return "fallthrough";
+  case 3:
+    return "fallthrough";
+  case 4:
     return "fallthrough";
   }
 }
@@ -3936,15 +3990,57 @@ void IBOutletCollectionAttr::printPretty(raw_ostream &OS, const PrintingPolicy &
     llvm_unreachable("Unknown attribute spelling!");
     break;
   case 0 : {
-    OS << " __attribute__((iboutletcollection(" << getInterface().getAsString() << ")))";
+    OS << " __attribute__((iboutletcollection";
+    unsigned TrailingOmittedArgs = 0;
+    if (!getInterfaceLoc())
+      ++TrailingOmittedArgs;
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << "(";
+    OS << "";
+    if (!(!getInterfaceLoc())) {
+      OS << "" << getInterface().getAsString() << "";
+    }
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << ")";
+    OS << "))";
     break;
   }
   case 1 : {
-    OS << " [[clang::iboutletcollection(" << getInterface().getAsString() << ")]]";
+    OS << " [[clang::iboutletcollection";
+    unsigned TrailingOmittedArgs = 0;
+    if (!getInterfaceLoc())
+      ++TrailingOmittedArgs;
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << "(";
+    OS << "";
+    if (!(!getInterfaceLoc())) {
+      OS << "" << getInterface().getAsString() << "";
+    }
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << ")";
+    OS << "]]";
     break;
   }
   case 2 : {
-    OS << " [[clang::iboutletcollection(" << getInterface().getAsString() << ")]]";
+    OS << " [[clang::iboutletcollection";
+    unsigned TrailingOmittedArgs = 0;
+    if (!getInterfaceLoc())
+      ++TrailingOmittedArgs;
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << "(";
+    OS << "";
+    if (!(!getInterfaceLoc())) {
+      OS << "" << getInterface().getAsString() << "";
+    }
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << ")";
+    OS << "]]";
     break;
   }
 }
@@ -6201,7 +6297,7 @@ const char *OMPDeclareSimdDeclAttr::getSpelling() const {
 }
 
 OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::clone(ASTContext &C) const {
-  auto *A = new (C) OMPDeclareTargetDeclAttr(getLocation(), C, mapType, getSpellingListIndex());
+  auto *A = new (C) OMPDeclareTargetDeclAttr(getLocation(), C, mapType, devType, getSpellingListIndex());
   A->Inherited = Inherited;
   A->IsPackExpansion = IsPackExpansion;
   A->Implicit = Implicit;
@@ -7989,6 +8085,50 @@ const char *OverrideAttr::getSpelling() const {
   }
 }
 
+OwnerAttr *OwnerAttr::clone(ASTContext &C) const {
+  auto *A = new (C) OwnerAttr(getLocation(), C, derefType, getSpellingListIndex());
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->Implicit = Implicit;
+  return A;
+}
+
+void OwnerAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (SpellingListIndex) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " [[gsl::Owner";
+    unsigned TrailingOmittedArgs = 0;
+    if (!getDerefTypeLoc())
+      ++TrailingOmittedArgs;
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << "(";
+    OS << "";
+    if (!(!getDerefTypeLoc())) {
+      OS << "" << getDerefType().getAsString() << "";
+    }
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << ")";
+    OS << "]]";
+    break;
+  }
+}
+}
+
+const char *OwnerAttr::getSpelling() const {
+  switch (SpellingListIndex) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "Owner";
+  }
+}
+
 OwnershipAttr *OwnershipAttr::clone(ASTContext &C) const {
   auto *A = new (C) OwnershipAttr(getLocation(), C, module, args_, args_Size, getSpellingListIndex());
   A->Inherited = Inherited;
@@ -8349,6 +8489,50 @@ const char *PcsAttr::getSpelling() const {
     return "pcs";
   case 1:
     return "pcs";
+  }
+}
+
+PointerAttr *PointerAttr::clone(ASTContext &C) const {
+  auto *A = new (C) PointerAttr(getLocation(), C, derefType, getSpellingListIndex());
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->Implicit = Implicit;
+  return A;
+}
+
+void PointerAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (SpellingListIndex) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " [[gsl::Pointer";
+    unsigned TrailingOmittedArgs = 0;
+    if (!getDerefTypeLoc())
+      ++TrailingOmittedArgs;
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << "(";
+    OS << "";
+    if (!(!getDerefTypeLoc())) {
+      OS << "" << getDerefType().getAsString() << "";
+    }
+    OS << "";
+    if (TrailingOmittedArgs < 1)
+       OS << ")";
+    OS << "]]";
+    break;
+  }
+}
+}
+
+const char *PointerAttr::getSpelling() const {
+  switch (SpellingListIndex) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "Pointer";
   }
 }
 
@@ -10793,7 +10977,7 @@ const char *WarnUnusedAttr::getSpelling() const {
 }
 
 WarnUnusedResultAttr *WarnUnusedResultAttr::clone(ASTContext &C) const {
-  auto *A = new (C) WarnUnusedResultAttr(getLocation(), C, getSpellingListIndex());
+  auto *A = new (C) WarnUnusedResultAttr(getLocation(), C, getMessage(), getSpellingListIndex());
   A->Inherited = Inherited;
   A->IsPackExpansion = IsPackExpansion;
   A->Implicit = Implicit;
@@ -10806,23 +10990,23 @@ void WarnUnusedResultAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Po
     llvm_unreachable("Unknown attribute spelling!");
     break;
   case 0 : {
-    OS << " [[nodiscard]]";
+    OS << " [[nodiscard(\"" << getMessage() << "\")]]";
     break;
   }
   case 1 : {
-    OS << " [[nodiscard]]";
+    OS << " [[nodiscard(\"" << getMessage() << "\")]]";
     break;
   }
   case 2 : {
-    OS << " [[clang::warn_unused_result]]";
+    OS << " [[clang::warn_unused_result(\"" << getMessage() << "\")]]";
     break;
   }
   case 3 : {
-    OS << " __attribute__((warn_unused_result))";
+    OS << " __attribute__((warn_unused_result(\"" << getMessage() << "\")))";
     break;
   }
   case 4 : {
-    OS << " [[gnu::warn_unused_result]]";
+    OS << " [[gnu::warn_unused_result(\"" << getMessage() << "\")]]";
     break;
   }
 }
@@ -11294,6 +11478,8 @@ const char *Attr::getSpelling() const {
     return cast<CFAuditedTransferAttr>(this)->getSpelling();
   case attr::CFConsumed:
     return cast<CFConsumedAttr>(this)->getSpelling();
+  case attr::CFICanonicalJumpTable:
+    return cast<CFICanonicalJumpTableAttr>(this)->getSpelling();
   case attr::CFReturnsNotRetained:
     return cast<CFReturnsNotRetainedAttr>(this)->getSpelling();
   case attr::CFReturnsRetained:
@@ -11620,6 +11806,8 @@ const char *Attr::getSpelling() const {
     return cast<OverloadableAttr>(this)->getSpelling();
   case attr::Override:
     return cast<OverrideAttr>(this)->getSpelling();
+  case attr::Owner:
+    return cast<OwnerAttr>(this)->getSpelling();
   case attr::Ownership:
     return cast<OwnershipAttr>(this)->getSpelling();
   case attr::Packed:
@@ -11632,6 +11820,8 @@ const char *Attr::getSpelling() const {
     return cast<PassObjectSizeAttr>(this)->getSpelling();
   case attr::Pcs:
     return cast<PcsAttr>(this)->getSpelling();
+  case attr::Pointer:
+    return cast<PointerAttr>(this)->getSpelling();
   case attr::PragmaClangBSSSection:
     return cast<PragmaClangBSSSectionAttr>(this)->getSpelling();
   case attr::PragmaClangDataSection:
@@ -11862,6 +12052,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<CFAuditedTransferAttr>(this)->clone(C);
   case attr::CFConsumed:
     return cast<CFConsumedAttr>(this)->clone(C);
+  case attr::CFICanonicalJumpTable:
+    return cast<CFICanonicalJumpTableAttr>(this)->clone(C);
   case attr::CFReturnsNotRetained:
     return cast<CFReturnsNotRetainedAttr>(this)->clone(C);
   case attr::CFReturnsRetained:
@@ -12188,6 +12380,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<OverloadableAttr>(this)->clone(C);
   case attr::Override:
     return cast<OverrideAttr>(this)->clone(C);
+  case attr::Owner:
+    return cast<OwnerAttr>(this)->clone(C);
   case attr::Ownership:
     return cast<OwnershipAttr>(this)->clone(C);
   case attr::Packed:
@@ -12200,6 +12394,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<PassObjectSizeAttr>(this)->clone(C);
   case attr::Pcs:
     return cast<PcsAttr>(this)->clone(C);
+  case attr::Pointer:
+    return cast<PointerAttr>(this)->clone(C);
   case attr::PragmaClangBSSSection:
     return cast<PragmaClangBSSSectionAttr>(this)->clone(C);
   case attr::PragmaClangDataSection:
@@ -12430,6 +12626,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<CFAuditedTransferAttr>(this)->printPretty(OS, Policy);
   case attr::CFConsumed:
     return cast<CFConsumedAttr>(this)->printPretty(OS, Policy);
+  case attr::CFICanonicalJumpTable:
+    return cast<CFICanonicalJumpTableAttr>(this)->printPretty(OS, Policy);
   case attr::CFReturnsNotRetained:
     return cast<CFReturnsNotRetainedAttr>(this)->printPretty(OS, Policy);
   case attr::CFReturnsRetained:
@@ -12756,6 +12954,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<OverloadableAttr>(this)->printPretty(OS, Policy);
   case attr::Override:
     return cast<OverrideAttr>(this)->printPretty(OS, Policy);
+  case attr::Owner:
+    return cast<OwnerAttr>(this)->printPretty(OS, Policy);
   case attr::Ownership:
     return cast<OwnershipAttr>(this)->printPretty(OS, Policy);
   case attr::Packed:
@@ -12768,6 +12968,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<PassObjectSizeAttr>(this)->printPretty(OS, Policy);
   case attr::Pcs:
     return cast<PcsAttr>(this)->printPretty(OS, Policy);
+  case attr::Pointer:
+    return cast<PointerAttr>(this)->printPretty(OS, Policy);
   case attr::PragmaClangBSSSection:
     return cast<PragmaClangBSSSectionAttr>(this)->printPretty(OS, Policy);
   case attr::PragmaClangDataSection:

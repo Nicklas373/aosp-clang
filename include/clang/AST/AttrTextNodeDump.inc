@@ -239,7 +239,7 @@
   }
   void VisitIBOutletCollectionAttr(const IBOutletCollectionAttr *A) {
     const auto *SA = cast<IBOutletCollectionAttr>(A); (void)SA;
-    OS << " " << SA->getInterface().getAsString();
+    if (SA->getInterfaceLoc())    OS << " " << SA->getInterface().getAsString();
   }
   void VisitIFuncAttr(const IFuncAttr *A) {
     const auto *SA = cast<IFuncAttr>(A); (void)SA;
@@ -293,6 +293,9 @@
       break;
     case LoopHintAttr::Distribute:
       OS << " Distribute";
+      break;
+    case LoopHintAttr::VectorizePredicate:
+      OS << " VectorizePredicate";
       break;
     }
     switch(SA->getState()) {
@@ -449,6 +452,17 @@
       OS << " MT_Link";
       break;
     }
+    switch(SA->getDevType()) {
+    case OMPDeclareTargetDeclAttr::DT_Host:
+      OS << " DT_Host";
+      break;
+    case OMPDeclareTargetDeclAttr::DT_NoHost:
+      OS << " DT_NoHost";
+      break;
+    case OMPDeclareTargetDeclAttr::DT_Any:
+      OS << " DT_Any";
+      break;
+    }
   }
   void VisitObjCBridgeAttr(const ObjCBridgeAttr *A) {
     const auto *SA = cast<ObjCBridgeAttr>(A); (void)SA;
@@ -517,6 +531,10 @@
     const auto *SA = cast<OpenCLUnrollHintAttr>(A); (void)SA;
     OS << " " << SA->getUnrollHint();
   }
+  void VisitOwnerAttr(const OwnerAttr *A) {
+    const auto *SA = cast<OwnerAttr>(A); (void)SA;
+    if (SA->getDerefTypeLoc())    OS << " " << SA->getDerefType().getAsString();
+  }
   void VisitOwnershipAttr(const OwnershipAttr *A) {
     const auto *SA = cast<OwnershipAttr>(A); (void)SA;
     OS << " " << A->getSpelling();
@@ -554,6 +572,10 @@
       OS << " AAPCS_VFP";
       break;
     }
+  }
+  void VisitPointerAttr(const PointerAttr *A) {
+    const auto *SA = cast<PointerAttr>(A); (void)SA;
+    if (SA->getDerefTypeLoc())    OS << " " << SA->getDerefType().getAsString();
   }
   void VisitPragmaClangBSSSectionAttr(const PragmaClangBSSSectionAttr *A) {
     const auto *SA = cast<PragmaClangBSSSectionAttr>(A); (void)SA;
@@ -740,7 +762,9 @@
     }
   }
   void VisitWarnUnusedResultAttr(const WarnUnusedResultAttr *A) {
+    const auto *SA = cast<WarnUnusedResultAttr>(A); (void)SA;
     OS << " " << A->getSpelling();
+    OS << " \"" << SA->getMessage() << "\"";
   }
   void VisitWeakRefAttr(const WeakRefAttr *A) {
     const auto *SA = cast<WeakRefAttr>(A); (void)SA;

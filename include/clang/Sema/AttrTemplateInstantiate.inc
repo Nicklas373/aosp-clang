@@ -238,6 +238,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<CFConsumedAttr>(At);
       return A->clone(C);
     }
+    case attr::CFICanonicalJumpTable: {
+      const auto *A = cast<CFICanonicalJumpTableAttr>(At);
+      return A->clone(C);
+    }
     case attr::CFReturnsNotRetained: {
       const auto *A = cast<CFReturnsNotRetainedAttr>(At);
       return A->clone(C);
@@ -942,6 +946,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<OverrideAttr>(At);
       return A->clone(C);
     }
+    case attr::Owner: {
+      const auto *A = cast<OwnerAttr>(At);
+      return A->clone(C);
+    }
     case attr::Ownership: {
       const auto *A = cast<OwnershipAttr>(At);
       return A->clone(C);
@@ -964,6 +972,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::Pcs: {
       const auto *A = cast<PcsAttr>(At);
+      return A->clone(C);
+    }
+    case attr::Pointer: {
+      const auto *A = cast<PointerAttr>(At);
       return A->clone(C);
     }
     case attr::PragmaClangBSSSection: {
@@ -1442,6 +1454,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::CFConsumed: {
+      return nullptr;
+    }
+    case attr::CFICanonicalJumpTable: {
       return nullptr;
     }
     case attr::CFReturnsNotRetained: {
@@ -1935,6 +1950,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::Override: {
       return nullptr;
     }
+    case attr::Owner: {
+      return nullptr;
+    }
     case attr::Ownership: {
       return nullptr;
     }
@@ -1951,6 +1969,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::Pcs: {
+      return nullptr;
+    }
+    case attr::Pointer: {
       return nullptr;
     }
     case attr::PragmaClangBSSSection: {

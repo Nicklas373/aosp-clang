@@ -168,6 +168,10 @@
   bool VisitCFConsumedAttr(CFConsumedAttr *A) {
     return true; 
   }
+  bool TraverseCFICanonicalJumpTableAttr(CFICanonicalJumpTableAttr *A);
+  bool VisitCFICanonicalJumpTableAttr(CFICanonicalJumpTableAttr *A) {
+    return true; 
+  }
   bool TraverseCFReturnsNotRetainedAttr(CFReturnsNotRetainedAttr *A);
   bool VisitCFReturnsNotRetainedAttr(CFReturnsNotRetainedAttr *A) {
     return true; 
@@ -820,6 +824,10 @@
   bool VisitOverrideAttr(OverrideAttr *A) {
     return true; 
   }
+  bool TraverseOwnerAttr(OwnerAttr *A);
+  bool VisitOwnerAttr(OwnerAttr *A) {
+    return true; 
+  }
   bool TraverseOwnershipAttr(OwnershipAttr *A);
   bool VisitOwnershipAttr(OwnershipAttr *A) {
     return true; 
@@ -842,6 +850,10 @@
   }
   bool TraversePcsAttr(PcsAttr *A);
   bool VisitPcsAttr(PcsAttr *A) {
+    return true; 
+  }
+  bool TraversePointerAttr(PointerAttr *A);
+  bool VisitPointerAttr(PointerAttr *A) {
     return true; 
   }
   bool TraversePragmaClangBSSSectionAttr(PragmaClangBSSSectionAttr *A);
@@ -1560,6 +1572,15 @@ bool VISITORCLASS<Derived>::TraverseCFConsumedAttr(CFConsumedAttr *A) {
   if (!getDerived().VisitAttr(A))
     return false;
   if (!getDerived().VisitCFConsumedAttr(A))
+    return false;
+  return true;
+}
+
+template <typename Derived>
+bool VISITORCLASS<Derived>::TraverseCFICanonicalJumpTableAttr(CFICanonicalJumpTableAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitCFICanonicalJumpTableAttr(A))
     return false;
   return true;
 }
@@ -3113,6 +3134,18 @@ bool VISITORCLASS<Derived>::TraverseOverrideAttr(OverrideAttr *A) {
 }
 
 template <typename Derived>
+bool VISITORCLASS<Derived>::TraverseOwnerAttr(OwnerAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitOwnerAttr(A))
+    return false;
+  if (auto *TSI = A->getDerefTypeLoc())
+    if (!getDerived().TraverseTypeLoc(TSI->getTypeLoc()))
+      return false;
+  return true;
+}
+
+template <typename Derived>
 bool VISITORCLASS<Derived>::TraverseOwnershipAttr(OwnershipAttr *A) {
   if (!getDerived().VisitAttr(A))
     return false;
@@ -3163,6 +3196,18 @@ bool VISITORCLASS<Derived>::TraversePcsAttr(PcsAttr *A) {
     return false;
   if (!getDerived().VisitPcsAttr(A))
     return false;
+  return true;
+}
+
+template <typename Derived>
+bool VISITORCLASS<Derived>::TraversePointerAttr(PointerAttr *A) {
+  if (!getDerived().VisitAttr(A))
+    return false;
+  if (!getDerived().VisitPointerAttr(A))
+    return false;
+  if (auto *TSI = A->getDerefTypeLoc())
+    if (!getDerived().TraverseTypeLoc(TSI->getTypeLoc()))
+      return false;
   return true;
 }
 
@@ -3944,6 +3989,8 @@ bool VISITORCLASS<Derived>::TraverseAttr(Attr *A) {
       return getDerived().TraverseCFAuditedTransferAttr(cast<CFAuditedTransferAttr>(A));
     case attr::CFConsumed:
       return getDerived().TraverseCFConsumedAttr(cast<CFConsumedAttr>(A));
+    case attr::CFICanonicalJumpTable:
+      return getDerived().TraverseCFICanonicalJumpTableAttr(cast<CFICanonicalJumpTableAttr>(A));
     case attr::CFReturnsNotRetained:
       return getDerived().TraverseCFReturnsNotRetainedAttr(cast<CFReturnsNotRetainedAttr>(A));
     case attr::CFReturnsRetained:
@@ -4270,6 +4317,8 @@ bool VISITORCLASS<Derived>::TraverseAttr(Attr *A) {
       return getDerived().TraverseOverloadableAttr(cast<OverloadableAttr>(A));
     case attr::Override:
       return getDerived().TraverseOverrideAttr(cast<OverrideAttr>(A));
+    case attr::Owner:
+      return getDerived().TraverseOwnerAttr(cast<OwnerAttr>(A));
     case attr::Ownership:
       return getDerived().TraverseOwnershipAttr(cast<OwnershipAttr>(A));
     case attr::Packed:
@@ -4282,6 +4331,8 @@ bool VISITORCLASS<Derived>::TraverseAttr(Attr *A) {
       return getDerived().TraversePassObjectSizeAttr(cast<PassObjectSizeAttr>(A));
     case attr::Pcs:
       return getDerived().TraversePcsAttr(cast<PcsAttr>(A));
+    case attr::Pointer:
+      return getDerived().TraversePointerAttr(cast<PointerAttr>(A));
     case attr::PragmaClangBSSSection:
       return getDerived().TraversePragmaClangBSSSectionAttr(cast<PragmaClangBSSSectionAttr>(A));
     case attr::PragmaClangDataSection:

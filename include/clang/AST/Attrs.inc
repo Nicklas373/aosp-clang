@@ -1731,6 +1731,30 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::CFConsumed; }
 };
 
+class CFICanonicalJumpTableAttr : public InheritableAttr {
+public:
+  static CFICanonicalJumpTableAttr *CreateImplicit(ASTContext &Ctx, SourceRange Loc = SourceRange()) {
+    auto *A = new (Ctx) CFICanonicalJumpTableAttr(Loc, Ctx, 0);
+    A->setImplicit(true);
+    return A;
+  }
+
+  CFICanonicalJumpTableAttr(SourceRange R, ASTContext &Ctx
+              , unsigned SI
+             )
+    : InheritableAttr(attr::CFICanonicalJumpTable, R, SI, false, false)
+  {
+  }
+
+  CFICanonicalJumpTableAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::CFICanonicalJumpTable; }
+};
+
 class CFReturnsNotRetainedAttr : public InheritableAttr {
 public:
   static CFReturnsNotRetainedAttr *CreateImplicit(ASTContext &Ctx, SourceRange Loc = SourceRange()) {
@@ -4104,7 +4128,8 @@ public:
     UnrollAndJamCount,
     PipelineDisabled,
     PipelineInitiationInterval,
-    Distribute
+    Distribute,
+    VectorizePredicate
   };
 private:
   OptionType option;
@@ -4181,6 +4206,7 @@ public:
       .Case("pipeline", LoopHintAttr::PipelineDisabled)
       .Case("pipeline_initiation_interval", LoopHintAttr::PipelineInitiationInterval)
       .Case("distribute", LoopHintAttr::Distribute)
+      .Case("vectorize_predicate", LoopHintAttr::VectorizePredicate)
       .Default(Optional<OptionType>());
     if (R) {
       Out = *R;
@@ -4202,6 +4228,7 @@ public:
     case LoopHintAttr::PipelineDisabled: return "pipeline";
     case LoopHintAttr::PipelineInitiationInterval: return "pipeline_initiation_interval";
     case LoopHintAttr::Distribute: return "distribute";
+    case LoopHintAttr::VectorizePredicate: return "vectorize_predicate";
     }
     llvm_unreachable("No enumerator with that value");
   }
@@ -4252,6 +4279,7 @@ public:
     case PipelineDisabled: return "pipeline";
     case PipelineInitiationInterval: return "pipeline_initiation_interval";
     case Distribute: return "distribute";
+    case VectorizePredicate: return "vectorize_predicate";
     }
     llvm_unreachable("Unhandled LoopHint option.");
   }
@@ -6020,18 +6048,29 @@ private:
   MapTypeTy mapType;
 
 public:
-  static OMPDeclareTargetDeclAttr *CreateImplicit(ASTContext &Ctx, MapTypeTy MapType, SourceRange Loc = SourceRange()) {
-    auto *A = new (Ctx) OMPDeclareTargetDeclAttr(Loc, Ctx, MapType, 0);
+  enum DevTypeTy {
+    DT_Host,
+    DT_NoHost,
+    DT_Any
+  };
+private:
+  DevTypeTy devType;
+
+public:
+  static OMPDeclareTargetDeclAttr *CreateImplicit(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, SourceRange Loc = SourceRange()) {
+    auto *A = new (Ctx) OMPDeclareTargetDeclAttr(Loc, Ctx, MapType, DevType, 0);
     A->setImplicit(true);
     return A;
   }
 
   OMPDeclareTargetDeclAttr(SourceRange R, ASTContext &Ctx
               , MapTypeTy MapType
+              , DevTypeTy DevType
               , unsigned SI
              )
     : InheritableAttr(attr::OMPDeclareTargetDecl, R, SI, false, false)
               , mapType(MapType)
+              , devType(DevType)
   {
   }
 
@@ -6062,9 +6101,36 @@ public:
     }
     llvm_unreachable("No enumerator with that value");
   }
+  DevTypeTy getDevType() const {
+    return devType;
+  }
+
+  static bool ConvertStrToDevTypeTy(StringRef Val, DevTypeTy &Out) {
+    Optional<DevTypeTy> R = llvm::StringSwitch<Optional<DevTypeTy>>(Val)
+      .Case("host", OMPDeclareTargetDeclAttr::DT_Host)
+      .Case("nohost", OMPDeclareTargetDeclAttr::DT_NoHost)
+      .Case("any", OMPDeclareTargetDeclAttr::DT_Any)
+      .Default(Optional<DevTypeTy>());
+    if (R) {
+      Out = *R;
+      return true;
+    }
+    return false;
+  }
+
+  static const char *ConvertDevTypeTyToStr(DevTypeTy Val) {
+    switch(Val) {
+    case OMPDeclareTargetDeclAttr::DT_Host: return "host";
+    case OMPDeclareTargetDeclAttr::DT_NoHost: return "nohost";
+    case OMPDeclareTargetDeclAttr::DT_Any: return "any";
+    }
+    llvm_unreachable("No enumerator with that value");
+  }
 
     void printPrettyPragma(raw_ostream &OS, const PrintingPolicy &Policy) const {
       // Use fake syntax because it is for testing and debugging purpose only.
+      if (getDevType() != DT_Any)
+        OS << " device_type(" << ConvertDevTypeTyToStr(getDevType()) << ")";
       if (getMapType() != MT_To)
         OS << ' ' << ConvertMapTypeTyToStr(getMapType());
     }
@@ -6074,6 +6140,14 @@ public:
         return llvm::None;
       if (const auto *Attr = VD->getAttr<OMPDeclareTargetDeclAttr>())
         return Attr->getMapType();
+
+      return llvm::None;
+    }
+    static llvm::Optional<DevTypeTy> getDeviceType(const ValueDecl *VD) {
+      if (!VD->hasAttrs())
+        return llvm::None;
+      if (const auto *Attr = VD->getAttr<OMPDeclareTargetDeclAttr>())
+        return Attr->getDevType();
 
       return llvm::None;
     }
@@ -7330,6 +7404,48 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::Override; }
 };
 
+class OwnerAttr : public InheritableAttr {
+TypeSourceInfo * derefType;
+
+public:
+  static OwnerAttr *CreateImplicit(ASTContext &Ctx, TypeSourceInfo * DerefType, SourceRange Loc = SourceRange()) {
+    auto *A = new (Ctx) OwnerAttr(Loc, Ctx, DerefType, 0);
+    A->setImplicit(true);
+    return A;
+  }
+
+  OwnerAttr(SourceRange R, ASTContext &Ctx
+              , TypeSourceInfo * DerefType
+              , unsigned SI
+             )
+    : InheritableAttr(attr::Owner, R, SI, false, false)
+              , derefType(DerefType)
+  {
+  }
+
+  OwnerAttr(SourceRange R, ASTContext &Ctx
+              , unsigned SI
+             )
+    : InheritableAttr(attr::Owner, R, SI, false, false)
+              , derefType()
+  {
+  }
+
+  OwnerAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  QualType getDerefType() const {
+    return derefType->getType();
+  }  TypeSourceInfo * getDerefTypeLoc() const {
+    return derefType;
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::Owner; }
+};
+
 class OwnershipAttr : public InheritableAttr {
 IdentifierInfo * module;
 
@@ -7645,6 +7761,48 @@ public:
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::Pcs; }
+};
+
+class PointerAttr : public InheritableAttr {
+TypeSourceInfo * derefType;
+
+public:
+  static PointerAttr *CreateImplicit(ASTContext &Ctx, TypeSourceInfo * DerefType, SourceRange Loc = SourceRange()) {
+    auto *A = new (Ctx) PointerAttr(Loc, Ctx, DerefType, 0);
+    A->setImplicit(true);
+    return A;
+  }
+
+  PointerAttr(SourceRange R, ASTContext &Ctx
+              , TypeSourceInfo * DerefType
+              , unsigned SI
+             )
+    : InheritableAttr(attr::Pointer, R, SI, false, false)
+              , derefType(DerefType)
+  {
+  }
+
+  PointerAttr(SourceRange R, ASTContext &Ctx
+              , unsigned SI
+             )
+    : InheritableAttr(attr::Pointer, R, SI, false, false)
+              , derefType()
+  {
+  }
+
+  PointerAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  QualType getDerefType() const {
+    return derefType->getType();
+  }  TypeSourceInfo * getDerefTypeLoc() const {
+    return derefType;
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::Pointer; }
 };
 
 class PragmaClangBSSSectionAttr : public InheritableAttr {
@@ -10031,6 +10189,9 @@ public:
 };
 
 class WarnUnusedResultAttr : public InheritableAttr {
+unsigned messageLength;
+char *message;
+
 public:
   enum Spelling {
     CXX11_nodiscard = 0,
@@ -10040,16 +10201,28 @@ public:
     CXX11_gnu_warn_unused_result = 4
   };
 
-  static WarnUnusedResultAttr *CreateImplicit(ASTContext &Ctx, Spelling S, SourceRange Loc = SourceRange()) {
-    auto *A = new (Ctx) WarnUnusedResultAttr(Loc, Ctx, S);
+  static WarnUnusedResultAttr *CreateImplicit(ASTContext &Ctx, Spelling S, llvm::StringRef Message, SourceRange Loc = SourceRange()) {
+    auto *A = new (Ctx) WarnUnusedResultAttr(Loc, Ctx, Message, S);
     A->setImplicit(true);
     return A;
+  }
+
+  WarnUnusedResultAttr(SourceRange R, ASTContext &Ctx
+              , llvm::StringRef Message
+              , unsigned SI
+             )
+    : InheritableAttr(attr::WarnUnusedResult, R, SI, false, false)
+              , messageLength(Message.size()),message(new (Ctx, 1) char[messageLength])
+  {
+      if (!Message.empty())
+        std::memcpy(message, Message.data(), messageLength);
   }
 
   WarnUnusedResultAttr(SourceRange R, ASTContext &Ctx
               , unsigned SI
              )
     : InheritableAttr(attr::WarnUnusedResult, R, SI, false, false)
+              , messageLength(0),message(nullptr)
   {
   }
 
@@ -10067,7 +10240,26 @@ public:
     case 4: return CXX11_gnu_warn_unused_result;
   }
   }
+  llvm::StringRef getMessage() const {
+    return llvm::StringRef(message, messageLength);
+  }
+  unsigned getMessageLength() const {
+    return messageLength;
+  }
+  void setMessage(ASTContext &C, llvm::StringRef S) {
+    messageLength = S.size();
+    this->message = new (C, 1) char [messageLength];
+    if (!S.empty())
+      std::memcpy(this->message, S.data(), messageLength);
+  }
 
+
+    // Check whether this the C++11 nodiscard version, even in non C++11
+    // spellings.
+    bool IsCXX11NoDiscard() const {
+      return this->getSemanticSpelling() == CXX11_nodiscard;
+    }
+  
 
   static bool classof(const Attr *A) { return A->getKind() == attr::WarnUnusedResult; }
 };

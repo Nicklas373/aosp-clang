@@ -71,6 +71,7 @@
   __interceptor_getpeername;
   __interceptor_getpwnam;
   __interceptor_getpwuid;
+  __interceptor_getrandom;
   __interceptor_getresgid;
   __interceptor_getresuid;
   __interceptor_getsockname;
@@ -396,6 +397,7 @@
   __sanitizer_syscall_post_impl_getpid;
   __sanitizer_syscall_post_impl_getppid;
   __sanitizer_syscall_post_impl_getpriority;
+  __sanitizer_syscall_post_impl_getrandom;
   __sanitizer_syscall_post_impl_getresgid;
   __sanitizer_syscall_post_impl_getresuid;
   __sanitizer_syscall_post_impl_getrlimit;
@@ -702,6 +704,7 @@
   __sanitizer_syscall_pre_impl_getpid;
   __sanitizer_syscall_pre_impl_getppid;
   __sanitizer_syscall_pre_impl_getpriority;
+  __sanitizer_syscall_pre_impl_getrandom;
   __sanitizer_syscall_pre_impl_getresgid;
   __sanitizer_syscall_pre_impl_getresuid;
   __sanitizer_syscall_pre_impl_getrlimit;
@@ -1012,6 +1015,7 @@
   getpeername;
   getpwnam;
   getpwuid;
+  getrandom;
   getresgid;
   getresuid;
   getsockname;

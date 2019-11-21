@@ -435,6 +435,15 @@
     New->setImplicit(isImplicit);
     break;
   }
+  case attr::CFICanonicalJumpTable: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    unsigned Spelling = Record.readInt();
+    New = new (Context) CFICanonicalJumpTableAttr(Range, Context, Spelling);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
   case attr::CFReturnsNotRetained: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
@@ -1597,7 +1606,8 @@
     bool isImplicit = Record.readInt();
     unsigned Spelling = Record.readInt();
     OMPDeclareTargetDeclAttr::MapTypeTy mapType(static_cast<OMPDeclareTargetDeclAttr::MapTypeTy>(Record.readInt()));
-    New = new (Context) OMPDeclareTargetDeclAttr(Range, Context, mapType, Spelling);
+    OMPDeclareTargetDeclAttr::DevTypeTy devType(static_cast<OMPDeclareTargetDeclAttr::DevTypeTy>(Record.readInt()));
+    New = new (Context) OMPDeclareTargetDeclAttr(Range, Context, mapType, devType, Spelling);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
     break;
@@ -1985,6 +1995,16 @@
     New->setImplicit(isImplicit);
     break;
   }
+  case attr::Owner: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    unsigned Spelling = Record.readInt();
+    TypeSourceInfo * derefType = Record.getTypeSourceInfo();
+    New = new (Context) OwnerAttr(Range, Context, derefType, Spelling);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
   case attr::Ownership: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
@@ -2044,6 +2064,16 @@
     unsigned Spelling = Record.readInt();
     PcsAttr::PCSType pCS(static_cast<PcsAttr::PCSType>(Record.readInt()));
     New = new (Context) PcsAttr(Range, Context, pCS, Spelling);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
+  case attr::Pointer: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    unsigned Spelling = Record.readInt();
+    TypeSourceInfo * derefType = Record.getTypeSourceInfo();
+    New = new (Context) PointerAttr(Range, Context, derefType, Spelling);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
     break;
@@ -2648,7 +2678,8 @@
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
     unsigned Spelling = Record.readInt();
-    New = new (Context) WarnUnusedResultAttr(Range, Context, Spelling);
+    std::string message= Record.readString();
+    New = new (Context) WarnUnusedResultAttr(Range, Context, message, Spelling);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
     break;

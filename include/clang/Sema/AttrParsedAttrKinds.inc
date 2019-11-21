@@ -574,7 +574,7 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
       break;
     }
     break;
-  case 11:	 // 18 strings to match.
+  case 11:	 // 19 strings to match.
     switch (Name[0]) {
     default: break;
     case 'a':	 // 2 strings to match.
@@ -609,6 +609,10 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
       if (memcmp(Name.data()+1, "iagnose_if", 10) != 0)
         break;
       return ParsedAttr::AT_DiagnoseIf;	 // "diagnose_if"
+    case 'f':	 // 1 string to match.
+      if (memcmp(Name.data()+1, "allthrough", 10) != 0)
+        break;
+      return ParsedAttr::AT_FallThrough;	 // "fallthrough"
     case 'g':	 // 1 string to match.
       if (memcmp(Name.data()+1, "uarded_var", 10) != 0)
         break;
@@ -1387,13 +1391,17 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
       return ParsedAttr::AT_SharedTrylockFunction;	 // "shared_trylock_function"
     }
     break;
-  case 24:	 // 4 strings to match.
+  case 24:	 // 5 strings to match.
     switch (Name[0]) {
     default: break;
     case 'a':	 // 1 string to match.
       if (memcmp(Name.data()+1, "ssert_shared_capability", 23) != 0)
         break;
       return ParsedAttr::AT_AssertCapability;	 // "assert_shared_capability"
+    case 'c':	 // 1 string to match.
+      if (memcmp(Name.data()+1, "fi_canonical_jump_table", 23) != 0)
+        break;
+      return ParsedAttr::AT_CFICanonicalJumpTable;	 // "cfi_canonical_jump_table"
     case 'e':	 // 1 string to match.
       if (memcmp(Name.data()+1, "xclusive_locks_required", 23) != 0)
         break;
@@ -1851,43 +1859,52 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
       return ParsedAttr::AT_Weak;	 // "gnu::weak"
     }
     break;
-  case 10:	 // 6 strings to match.
+  case 10:	 // 7 strings to match.
     switch (Name[0]) {
     default: break;
     case ':':	 // 1 string to match.
       if (memcmp(Name.data()+1, ":noreturn", 9) != 0)
         break;
       return ParsedAttr::AT_CXX11NoReturn;	 // "::noreturn"
-    case 'g':	 // 5 strings to match.
-      if (memcmp(Name.data()+1, "nu::", 4) != 0)
-        break;
-      switch (Name[5]) {
+    case 'g':	 // 6 strings to match.
+      switch (Name[1]) {
       default: break;
-      case 'a':	 // 1 string to match.
-        if (memcmp(Name.data()+6, "lias", 4) != 0)
+      case 'n':	 // 5 strings to match.
+        if (memcmp(Name.data()+2, "u::", 3) != 0)
           break;
-        return ParsedAttr::AT_Alias;	 // "gnu::alias"
-      case 'c':	 // 2 strings to match.
-        switch (Name[6]) {
+        switch (Name[5]) {
         default: break;
-        case 'd':	 // 1 string to match.
-          if (memcmp(Name.data()+7, "ecl", 3) != 0)
+        case 'a':	 // 1 string to match.
+          if (memcmp(Name.data()+6, "lias", 4) != 0)
             break;
-          return ParsedAttr::AT_CDecl;	 // "gnu::cdecl"
-        case 'o':	 // 1 string to match.
-          if (memcmp(Name.data()+7, "nst", 3) != 0)
+          return ParsedAttr::AT_Alias;	 // "gnu::alias"
+        case 'c':	 // 2 strings to match.
+          switch (Name[6]) {
+          default: break;
+          case 'd':	 // 1 string to match.
+            if (memcmp(Name.data()+7, "ecl", 3) != 0)
+              break;
+            return ParsedAttr::AT_CDecl;	 // "gnu::cdecl"
+          case 'o':	 // 1 string to match.
+            if (memcmp(Name.data()+7, "nst", 3) != 0)
+              break;
+            return ParsedAttr::AT_Const;	 // "gnu::const"
+          }
+          break;
+        case 'i':	 // 1 string to match.
+          if (memcmp(Name.data()+6, "func", 4) != 0)
             break;
-          return ParsedAttr::AT_Const;	 // "gnu::const"
+          return ParsedAttr::AT_IFunc;	 // "gnu::ifunc"
+        case 'n':	 // 1 string to match.
+          if (memcmp(Name.data()+6, "aked", 4) != 0)
+            break;
+          return ParsedAttr::AT_Naked;	 // "gnu::naked"
         }
         break;
-      case 'i':	 // 1 string to match.
-        if (memcmp(Name.data()+6, "func", 4) != 0)
+      case 's':	 // 1 string to match.
+        if (memcmp(Name.data()+2, "l::Owner", 8) != 0)
           break;
-        return ParsedAttr::AT_IFunc;	 // "gnu::ifunc"
-      case 'n':	 // 1 string to match.
-        if (memcmp(Name.data()+6, "aked", 4) != 0)
-          break;
-        return ParsedAttr::AT_Naked;	 // "gnu::naked"
+        return ParsedAttr::AT_Owner;	 // "gsl::Owner"
       }
       break;
     }
@@ -1949,94 +1966,103 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
       break;
     }
     break;
-  case 12:	 // 14 strings to match.
+  case 12:	 // 15 strings to match.
     switch (Name[0]) {
     default: break;
     case ':':	 // 1 string to match.
       if (memcmp(Name.data()+1, ":deprecated", 11) != 0)
         break;
       return ParsedAttr::AT_Deprecated;	 // "::deprecated"
-    case 'g':	 // 13 strings to match.
-      if (memcmp(Name.data()+1, "nu::", 4) != 0)
-        break;
-      switch (Name[5]) {
+    case 'g':	 // 14 strings to match.
+      switch (Name[1]) {
       default: break;
-      case '_':	 // 1 string to match.
-        if (memcmp(Name.data()+6, "_const", 6) != 0)
+      case 'n':	 // 13 strings to match.
+        if (memcmp(Name.data()+2, "u::", 3) != 0)
           break;
-        return ParsedAttr::AT_Const;	 // "gnu::__const"
-      case 'a':	 // 2 strings to match.
-        switch (Name[6]) {
+        switch (Name[5]) {
         default: break;
-        case 'b':	 // 1 string to match.
-          if (memcmp(Name.data()+7, "i_tag", 5) != 0)
+        case '_':	 // 1 string to match.
+          if (memcmp(Name.data()+6, "_const", 6) != 0)
             break;
-          return ParsedAttr::AT_AbiTag;	 // "gnu::abi_tag"
-        case 'l':	 // 1 string to match.
-          if (memcmp(Name.data()+7, "igned", 5) != 0)
-            break;
-          return ParsedAttr::AT_Aligned;	 // "gnu::aligned"
-        }
-        break;
-      case 'c':	 // 1 string to match.
-        if (memcmp(Name.data()+6, "leanup", 6) != 0)
+          return ParsedAttr::AT_Const;	 // "gnu::__const"
+        case 'a':	 // 2 strings to match.
+          switch (Name[6]) {
+          default: break;
+          case 'b':	 // 1 string to match.
+            if (memcmp(Name.data()+7, "i_tag", 5) != 0)
+              break;
+            return ParsedAttr::AT_AbiTag;	 // "gnu::abi_tag"
+          case 'l':	 // 1 string to match.
+            if (memcmp(Name.data()+7, "igned", 5) != 0)
+              break;
+            return ParsedAttr::AT_Aligned;	 // "gnu::aligned"
+          }
           break;
-        return ParsedAttr::AT_Cleanup;	 // "gnu::cleanup"
-      case 'f':	 // 1 string to match.
-        if (memcmp(Name.data()+6, "latten", 6) != 0)
-          break;
-        return ParsedAttr::AT_Flatten;	 // "gnu::flatten"
-      case 'n':	 // 3 strings to match.
-        if (Name[6] != 'o')
-          break;
-        switch (Name[7]) {
-        default: break;
-        case 'd':	 // 1 string to match.
-          if (memcmp(Name.data()+8, "ebug", 4) != 0)
-            break;
-          return ParsedAttr::AT_NoDebug;	 // "gnu::nodebug"
-        case 'n':	 // 1 string to match.
-          if (memcmp(Name.data()+8, "null", 4) != 0)
-            break;
-          return ParsedAttr::AT_NonNull;	 // "gnu::nonnull"
-        case 't':	 // 1 string to match.
-          if (memcmp(Name.data()+8, "hrow", 4) != 0)
-            break;
-          return ParsedAttr::AT_NoThrow;	 // "gnu::nothrow"
-        }
-        break;
-      case 'r':	 // 2 strings to match.
-        if (memcmp(Name.data()+6, "eg", 2) != 0)
-          break;
-        switch (Name[8]) {
-        default: break;
         case 'c':	 // 1 string to match.
-          if (memcmp(Name.data()+9, "all", 3) != 0)
+          if (memcmp(Name.data()+6, "leanup", 6) != 0)
             break;
-          return ParsedAttr::AT_RegCall;	 // "gnu::regcall"
-        case 'p':	 // 1 string to match.
-          if (memcmp(Name.data()+9, "arm", 3) != 0)
+          return ParsedAttr::AT_Cleanup;	 // "gnu::cleanup"
+        case 'f':	 // 1 string to match.
+          if (memcmp(Name.data()+6, "latten", 6) != 0)
             break;
-          return ParsedAttr::AT_Regparm;	 // "gnu::regparm"
-        }
-        break;
-      case 's':	 // 2 strings to match.
-        switch (Name[6]) {
-        default: break;
-        case 'e':	 // 1 string to match.
-          if (memcmp(Name.data()+7, "ction", 5) != 0)
+          return ParsedAttr::AT_Flatten;	 // "gnu::flatten"
+        case 'n':	 // 3 strings to match.
+          if (Name[6] != 'o')
             break;
-          return ParsedAttr::AT_Section;	 // "gnu::section"
-        case 't':	 // 1 string to match.
-          if (memcmp(Name.data()+7, "dcall", 5) != 0)
-            break;
-          return ParsedAttr::AT_StdCall;	 // "gnu::stdcall"
-        }
-        break;
-      case 'w':	 // 1 string to match.
-        if (memcmp(Name.data()+6, "eakref", 6) != 0)
+          switch (Name[7]) {
+          default: break;
+          case 'd':	 // 1 string to match.
+            if (memcmp(Name.data()+8, "ebug", 4) != 0)
+              break;
+            return ParsedAttr::AT_NoDebug;	 // "gnu::nodebug"
+          case 'n':	 // 1 string to match.
+            if (memcmp(Name.data()+8, "null", 4) != 0)
+              break;
+            return ParsedAttr::AT_NonNull;	 // "gnu::nonnull"
+          case 't':	 // 1 string to match.
+            if (memcmp(Name.data()+8, "hrow", 4) != 0)
+              break;
+            return ParsedAttr::AT_NoThrow;	 // "gnu::nothrow"
+          }
           break;
-        return ParsedAttr::AT_WeakRef;	 // "gnu::weakref"
+        case 'r':	 // 2 strings to match.
+          if (memcmp(Name.data()+6, "eg", 2) != 0)
+            break;
+          switch (Name[8]) {
+          default: break;
+          case 'c':	 // 1 string to match.
+            if (memcmp(Name.data()+9, "all", 3) != 0)
+              break;
+            return ParsedAttr::AT_RegCall;	 // "gnu::regcall"
+          case 'p':	 // 1 string to match.
+            if (memcmp(Name.data()+9, "arm", 3) != 0)
+              break;
+            return ParsedAttr::AT_Regparm;	 // "gnu::regparm"
+          }
+          break;
+        case 's':	 // 2 strings to match.
+          switch (Name[6]) {
+          default: break;
+          case 'e':	 // 1 string to match.
+            if (memcmp(Name.data()+7, "ction", 5) != 0)
+              break;
+            return ParsedAttr::AT_Section;	 // "gnu::section"
+          case 't':	 // 1 string to match.
+            if (memcmp(Name.data()+7, "dcall", 5) != 0)
+              break;
+            return ParsedAttr::AT_StdCall;	 // "gnu::stdcall"
+          }
+          break;
+        case 'w':	 // 1 string to match.
+          if (memcmp(Name.data()+6, "eakref", 6) != 0)
+            break;
+          return ParsedAttr::AT_WeakRef;	 // "gnu::weakref"
+        }
+        break;
+      case 's':	 // 1 string to match.
+        if (memcmp(Name.data()+2, "l::Pointer", 10) != 0)
+          break;
+        return ParsedAttr::AT_Pointer;	 // "gsl::Pointer"
       }
       break;
     }
@@ -2315,7 +2341,7 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
       break;
     }
     break;
-  case 16:	 // 8 strings to match.
+  case 16:	 // 9 strings to match.
     switch (Name[0]) {
     default: break;
     case 'c':	 // 3 strings to match.
@@ -2337,7 +2363,7 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
         return ParsedAttr::AT_VecReturn;	 // "clang::vecreturn"
       }
       break;
-    case 'g':	 // 5 strings to match.
+    case 'g':	 // 6 strings to match.
       if (memcmp(Name.data()+1, "nu::", 4) != 0)
         break;
       switch (Name[5]) {
@@ -2350,6 +2376,10 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
         if (memcmp(Name.data()+6, "onstructor", 10) != 0)
           break;
         return ParsedAttr::AT_Constructor;	 // "gnu::constructor"
+      case 'f':	 // 1 string to match.
+        if (memcmp(Name.data()+6, "allthrough", 10) != 0)
+          break;
+        return ParsedAttr::AT_FallThrough;	 // "gnu::fallthrough"
       case 'n':	 // 1 string to match.
         if (memcmp(Name.data()+6, "omicromips", 10) != 0)
           break;
@@ -3142,10 +3172,10 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
       return ParsedAttr::AT_AnyX86NoCallerSavedRegisters;	 // "gnu::no_caller_saved_registers"
     }
     break;
-  case 31:	 // 5 strings to match.
+  case 31:	 // 6 strings to match.
     switch (Name[0]) {
     default: break;
-    case 'c':	 // 4 strings to match.
+    case 'c':	 // 5 strings to match.
       if (memcmp(Name.data()+1, "lang::", 6) != 0)
         break;
       switch (Name[7]) {
@@ -3154,6 +3184,10 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
         if (memcmp(Name.data()+8, "ssert_shared_capability", 23) != 0)
           break;
         return ParsedAttr::AT_AssertCapability;	 // "clang::assert_shared_capability"
+      case 'c':	 // 1 string to match.
+        if (memcmp(Name.data()+8, "fi_canonical_jump_table", 23) != 0)
+          break;
+        return ParsedAttr::AT_CFICanonicalJumpTable;	 // "clang::cfi_canonical_jump_table"
       case 'e':	 // 1 string to match.
         if (memcmp(Name.data()+8, "xclusive_locks_required", 23) != 0)
           break;
@@ -3929,11 +3963,15 @@ static ParsedAttr::Kind getAttrKind(StringRef Name, ParsedAttr::Syntax Syntax) {
       return ParsedAttr::AT_OSReturnsNotRetained;	 // "clang::os_returns_not_retained"
     }
     break;
-  case 31:	 // 2 strings to match.
+  case 31:	 // 3 strings to match.
     if (memcmp(Name.data()+0, "clang::", 7) != 0)
       break;
     switch (Name[7]) {
     default: break;
+    case 'c':	 // 1 string to match.
+      if (memcmp(Name.data()+8, "fi_canonical_jump_table", 23) != 0)
+        break;
+      return ParsedAttr::AT_CFICanonicalJumpTable;	 // "clang::cfi_canonical_jump_table"
     case 'o':	 // 1 string to match.
       if (memcmp(Name.data()+8, "bjc_externally_retained", 23) != 0)
         break;
