@@ -86,9 +86,15 @@
     OS << " " << SA->getTypeTagIdx().getSourceIndex();
     if (SA->getIsPointer()) OS << " IsPointer";
   }
+  void VisitArmMveAliasAttr(const ArmMveAliasAttr *A) {
+    const auto *SA = cast<ArmMveAliasAttr>(A); (void)SA;
+    if (SA->getBuiltinName())
+      OS << " " << SA->getBuiltinName()->getName();
+  }
   void VisitAsmLabelAttr(const AsmLabelAttr *A) {
     const auto *SA = cast<AsmLabelAttr>(A); (void)SA;
     OS << " \"" << SA->getLabel() << "\"";
+    if (SA->getIsLiteralLabel()) OS << " IsLiteralLabel";
   }
   void VisitAssertCapabilityAttr(const AssertCapabilityAttr *A) {
     const auto *SA = cast<AssertCapabilityAttr>(A); (void)SA;
@@ -159,6 +165,9 @@
   void VisitCodeSegAttr(const CodeSegAttr *A) {
     const auto *SA = cast<CodeSegAttr>(A); (void)SA;
     OS << " \"" << SA->getName() << "\"";
+  }
+  void VisitConstInitAttr(const ConstInitAttr *A) {
+    OS << " " << A->getSpelling();
   }
   void VisitConstructorAttr(const ConstructorAttr *A) {
     const auto *SA = cast<ConstructorAttr>(A); (void)SA;
@@ -380,6 +389,11 @@
     if (SA->getMode())
       OS << " " << SA->getMode()->getName();
   }
+  void VisitNoBuiltinAttr(const NoBuiltinAttr *A) {
+    const auto *SA = cast<NoBuiltinAttr>(A); (void)SA;
+    for (const auto &Val : SA->builtinNames())
+      OS << " " << Val;
+  }
   void VisitNoSanitizeAttr(const NoSanitizeAttr *A) {
     const auto *SA = cast<NoSanitizeAttr>(A); (void)SA;
     for (const auto &Val : SA->sanitizers())
@@ -463,6 +477,17 @@
       OS << " DT_Any";
       break;
     }
+  }
+  void VisitOMPDeclareVariantAttr(const OMPDeclareVariantAttr *A) {
+    const auto *SA = cast<OMPDeclareVariantAttr>(A); (void)SA;
+    for (const auto &Val : SA->ctxSelectorSets())
+      OS << " " << Val;
+    for (const auto &Val : SA->ctxSelectors())
+      OS << " " << Val;
+    for (const auto &Val : SA->implVendors())
+      OS << " " << Val;
+    for (const auto &Val : SA->deviceKinds())
+      OS << " " << Val;
   }
   void VisitObjCBridgeAttr(const ObjCBridgeAttr *A) {
     const auto *SA = cast<ObjCBridgeAttr>(A); (void)SA;
@@ -583,6 +608,10 @@
   }
   void VisitPragmaClangDataSectionAttr(const PragmaClangDataSectionAttr *A) {
     const auto *SA = cast<PragmaClangDataSectionAttr>(A); (void)SA;
+    OS << " \"" << SA->getName() << "\"";
+  }
+  void VisitPragmaClangRelroSectionAttr(const PragmaClangRelroSectionAttr *A) {
+    const auto *SA = cast<PragmaClangRelroSectionAttr>(A); (void)SA;
     OS << " \"" << SA->getName() << "\"";
   }
   void VisitPragmaClangRodataSectionAttr(const PragmaClangRodataSectionAttr *A) {

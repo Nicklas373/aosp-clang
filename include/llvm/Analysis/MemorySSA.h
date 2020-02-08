@@ -95,6 +95,7 @@
 #include "llvm/IR/ValueHandle.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/Casting.h"
+#include "llvm/Support/CommandLine.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -785,7 +786,7 @@ public:
 
   /// Used in various insertion functions to specify whether we are talking
   /// about the beginning or end of a block.
-  enum InsertionPlace { Beginning, End };
+  enum InsertionPlace { Beginning, End, BeforeTerminator };
 
 protected:
   // Used by Memory SSA annotater, dumpers, and wrapper pass

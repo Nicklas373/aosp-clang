@@ -83,6 +83,12 @@ FRIENDTEMPLATE(FriendTemplate, Decl)
 IMPORT(Import, Decl)
 #undef IMPORT
 
+#ifndef LIFETIMEEXTENDEDTEMPORARY
+#  define LIFETIMEEXTENDEDTEMPORARY(Type, Base) DECL(Type, Base)
+#endif
+LIFETIMEEXTENDEDTEMPORARY(LifetimeExtendedTemporary, Decl)
+#undef LIFETIMEEXTENDEDTEMPORARY
+
 #ifndef LINKAGESPEC
 #  define LINKAGESPEC(Type, Base) DECL(Type, Base)
 #endif

@@ -89,6 +89,7 @@ CHECKER("debug.DumpControlDependencies", ControlDependencyTreeDumper, "Print the
 CHECKER("alpha.core.Conversion", ConversionChecker, "Loss of sign/precision in implicit conversions", "https://clang-analyzer.llvm.org/alpha_checks.html#alpha.core.Conversion", false)
 CHECKER("valist.CopyToSelf", CopyToSelfChecker, "Check for va_lists which are copied onto itself.", "", false)
 CHECKER("deadcode.DeadStores", DeadStoresChecker, "Check for values stored to variables that are never read afterwards", "https://clang-analyzer.llvm.org/available_checks.html#deadcode.DeadStores", false)
+CHECKER("debug.DebugIteratorModeling", DebugIteratorModeling, "Check the analyzer's understanding of C++ iterators", "", true)
 CHECKER("alpha.cplusplus.DeleteWithNonVirtualDtor", DeleteWithNonVirtualDtorChecker, "Reports destructions of polymorphic objects with a non-virtual destructor in their base class", "https://clang-analyzer.llvm.org/alpha_checks.html#alpha.cplusplus.DeleteWithNonVirtualDtor", false)
 CHECKER("security.insecureAPI.DeprecatedOrUnsafeBufferHandling", DeprecatedOrUnsafeBufferHandling, "Warn on uses of unsecure or deprecated buffer manipulating functions", "https://clang-analyzer.llvm.org/available_checks.html#security.insecureAPI.DeprecatedOrUnsafeBufferHandling", false)
 CHECKER("core.NullDereference", DereferenceChecker, "Check for dereferences of null pointers", "https://clang-analyzer.llvm.org/available_checks.html#core.NullDereference", false)
@@ -232,6 +233,7 @@ CHECKER_DEPENDENCY("alpha.unix.cstring.OutOfBounds", "unix.cstring.CStringModeli
 CHECKER_DEPENDENCY("unix.cstring.BadSizeArg", "unix.cstring.CStringModeling")
 CHECKER_DEPENDENCY("alpha.core.CallAndMessageUnInitRefArg", "core.CallAndMessage")
 CHECKER_DEPENDENCY("valist.CopyToSelf", "valist.ValistBase")
+CHECKER_DEPENDENCY("debug.DebugIteratorModeling", "alpha.cplusplus.IteratorModeling")
 CHECKER_DEPENDENCY("security.insecureAPI.DeprecatedOrUnsafeBufferHandling", "security.insecureAPI.SecuritySyntaxChecker")
 CHECKER_DEPENDENCY("alpha.osx.cocoa.DirectIvarAssignmentForAnnotatedFunctions", "alpha.osx.cocoa.DirectIvarAssignment")
 CHECKER_DEPENDENCY("unix.DynamicMemoryModeling", "unix.cstring.CStringModeling")
@@ -296,6 +298,7 @@ CHECKER_OPTION("int", "alpha.clone.CloneChecker", "MinimumCloneComplexity", "Ens
 CHECKER_OPTION("bool", "alpha.clone.CloneChecker", "ReportNormalClones", "Report all clones, even less suspicious ones.", "true", "released", false)
 CHECKER_OPTION("string", "alpha.clone.CloneChecker", "IgnoredFilesPattern", "If supplied, the checker wont analyze files with a filename that matches the given pattern.", "\"\"", "released", false)
 CHECKER_OPTION("bool", "deadcode.DeadStores", "WarnForDeadNestedAssignments", "Warns for deadstores in nested assignments.E.g.: if ((P = f())) where P is unused.", "true", "released", false)
+CHECKER_OPTION("bool", "deadcode.DeadStores", "ShowFixIts", "Enable fix-it hints for this checker", "false", "alpha", false)
 CHECKER_OPTION("bool", "unix.DynamicMemoryModeling", "Optimistic", "If set to true, the checker assumes that all the allocating and deallocating functions are annotated with ownership_holds, ownership_takes and ownership_returns.", "false", "alpha", false)
 CHECKER_OPTION("string", "alpha.security.taint.TaintPropagation", "Config", "Specifies the name of the configuration file.", "", "alpha", false)
 CHECKER_OPTION("int", "alpha.security.MmapWriteExec", "MmapProtExec", "Specifies the value of PROT_EXEC", "0x04", "released", false)
@@ -311,6 +314,7 @@ CHECKER_OPTION("bool", "optin.cplusplus.UninitializedObject", "NotesAsWarnings",
 CHECKER_OPTION("bool", "optin.cplusplus.UninitializedObject", "CheckPointeeInitialization", "If set to false, the checker will not analyze the pointee of pointer/reference fields, and will only check whether the object itself is initialized.", "false", "alpha", false)
 CHECKER_OPTION("string", "optin.cplusplus.UninitializedObject", "IgnoreRecordsWithField", "If supplied, the checker will not analyze structures that have a field with a name or type name that matches the given pattern.", "\"\"", "released", false)
 CHECKER_OPTION("bool", "optin.cplusplus.UninitializedObject", "IgnoreGuardedFields", "If set to true, the checker will analyze _syntactically_ whether the found uninitialized object is used without a preceding assert call. Defaults to false.", "false", "alpha", false)
+CHECKER_OPTION("bool", "optin.cplusplus.VirtualCall", "ShowFixIts", "Enable fix-it hints for this checker", "false", "alpha", false)
 CHECKER_OPTION("bool", "optin.cplusplus.VirtualCall", "PureOnly", "Disables the checker. Keeps cplusplus.PureVirtualCall enabled. This option is only provided for backwards compatibility.", "false", "alpha", false)
 #endif // GET_CHECKER_OPTIONS
 

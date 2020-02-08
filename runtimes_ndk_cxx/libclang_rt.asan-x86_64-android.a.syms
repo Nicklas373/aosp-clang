@@ -71,7 +71,6 @@
   __interceptor_getpeername;
   __interceptor_getpwnam;
   __interceptor_getpwuid;
-  __interceptor_getrandom;
   __interceptor_getresgid;
   __interceptor_getresuid;
   __interceptor_getsockname;
@@ -310,6 +309,7 @@
   __sanitizer_get_ownership;
   __sanitizer_get_unmapped_bytes;
   __sanitizer_install_malloc_and_free_hooks;
+  __sanitizer_on_print;
   __sanitizer_print_memory_profile;
   __sanitizer_print_stack_trace;
   __sanitizer_ptr_cmp;
@@ -1015,7 +1015,6 @@
   getpeername;
   getpwnam;
   getpwuid;
-  getrandom;
   getresgid;
   getresuid;
   getsockname;

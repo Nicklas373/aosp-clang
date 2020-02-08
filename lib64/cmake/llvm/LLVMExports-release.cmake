@@ -254,6 +254,16 @@ set_target_properties(LLVMCoroutines PROPERTIES
 list(APPEND _IMPORT_CHECK_TARGETS LLVMCoroutines )
 list(APPEND _IMPORT_CHECK_FILES_FOR_LLVMCoroutines "${_IMPORT_PREFIX}/lib64/libLLVMCoroutines.a" )
 
+# Import target "LLVMCFGuard" for configuration "Release"
+set_property(TARGET LLVMCFGuard APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(LLVMCFGuard PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libLLVMCFGuard.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS LLVMCFGuard )
+list(APPEND _IMPORT_CHECK_FILES_FOR_LLVMCFGuard "${_IMPORT_PREFIX}/lib64/libLLVMCFGuard.a" )
+
 # Import target "LLVMLinker" for configuration "Release"
 set_property(TARGET LLVMLinker APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(LLVMLinker PROPERTIES
@@ -463,6 +473,16 @@ set_target_properties(LLVMMCJIT PROPERTIES
 
 list(APPEND _IMPORT_CHECK_TARGETS LLVMMCJIT )
 list(APPEND _IMPORT_CHECK_FILES_FOR_LLVMMCJIT "${_IMPORT_PREFIX}/lib64/libLLVMMCJIT.a" )
+
+# Import target "LLVMOrcError" for configuration "Release"
+set_property(TARGET LLVMOrcError APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(LLVMOrcError PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libLLVMOrcError.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS LLVMOrcError )
+list(APPEND _IMPORT_CHECK_FILES_FOR_LLVMOrcError "${_IMPORT_PREFIX}/lib64/libLLVMOrcError.a" )
 
 # Import target "LLVMOrcJIT" for configuration "Release"
 set_property(TARGET LLVMOrcJIT APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -827,12 +847,12 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_LLVMWindowsManifest "${_IMPORT_PREFIX}/lib64
 # Import target "LTO" for configuration "Release"
 set_property(TARGET LTO APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(LTO PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libLTO.so.10svn"
-  IMPORTED_SONAME_RELEASE "libLTO.so.10svn"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libLTO.so.10git"
+  IMPORTED_SONAME_RELEASE "libLTO.so.10git"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS LTO )
-list(APPEND _IMPORT_CHECK_FILES_FOR_LTO "${_IMPORT_PREFIX}/lib64/libLTO.so.10svn" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_LTO "${_IMPORT_PREFIX}/lib64/libLTO.so.10git" )
 
 # Import target "LLVMgold" for configuration "Release"
 set_property(TARGET LLVMgold APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -879,36 +899,6 @@ set_target_properties(llvm-profdata PROPERTIES
 
 list(APPEND _IMPORT_CHECK_TARGETS llvm-profdata )
 list(APPEND _IMPORT_CHECK_FILES_FOR_llvm-profdata "${_IMPORT_PREFIX}/bin/llvm-profdata" )
-
-# Import target "SampleAnalyzerPlugin" for configuration "Release"
-set_property(TARGET SampleAnalyzerPlugin APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-set_target_properties(SampleAnalyzerPlugin PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/SampleAnalyzerPlugin.so"
-  IMPORTED_NO_SONAME_RELEASE "TRUE"
-  )
-
-list(APPEND _IMPORT_CHECK_TARGETS SampleAnalyzerPlugin )
-list(APPEND _IMPORT_CHECK_FILES_FOR_SampleAnalyzerPlugin "${_IMPORT_PREFIX}/lib64/SampleAnalyzerPlugin.so" )
-
-# Import target "CheckerDependencyHandlingAnalyzerPlugin" for configuration "Release"
-set_property(TARGET CheckerDependencyHandlingAnalyzerPlugin APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-set_target_properties(CheckerDependencyHandlingAnalyzerPlugin PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/CheckerDependencyHandlingAnalyzerPlugin.so"
-  IMPORTED_NO_SONAME_RELEASE "TRUE"
-  )
-
-list(APPEND _IMPORT_CHECK_TARGETS CheckerDependencyHandlingAnalyzerPlugin )
-list(APPEND _IMPORT_CHECK_FILES_FOR_CheckerDependencyHandlingAnalyzerPlugin "${_IMPORT_PREFIX}/lib64/CheckerDependencyHandlingAnalyzerPlugin.so" )
-
-# Import target "CheckerOptionHandlingAnalyzerPlugin" for configuration "Release"
-set_property(TARGET CheckerOptionHandlingAnalyzerPlugin APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-set_target_properties(CheckerOptionHandlingAnalyzerPlugin PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/CheckerOptionHandlingAnalyzerPlugin.so"
-  IMPORTED_NO_SONAME_RELEASE "TRUE"
-  )
-
-list(APPEND _IMPORT_CHECK_TARGETS CheckerOptionHandlingAnalyzerPlugin )
-list(APPEND _IMPORT_CHECK_FILES_FOR_CheckerOptionHandlingAnalyzerPlugin "${_IMPORT_PREFIX}/lib64/CheckerOptionHandlingAnalyzerPlugin.so" )
 
 # Import target "bugpoint" for configuration "Release"
 set_property(TARGET bugpoint APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -1264,12 +1254,12 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_llvm-rtdyld "${_IMPORT_PREFIX}/bin/llvm-rtdy
 # Import target "LLVM" for configuration "Release"
 set_property(TARGET LLVM APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(LLVM PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libLLVM-10svn.so"
-  IMPORTED_SONAME_RELEASE "libLLVM-10svn.so"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libLLVM-10git.so"
+  IMPORTED_SONAME_RELEASE "libLLVM-10git.so"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS LLVM )
-list(APPEND _IMPORT_CHECK_FILES_FOR_LLVM "${_IMPORT_PREFIX}/lib64/libLLVM-10svn.so" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_LLVM "${_IMPORT_PREFIX}/lib64/libLLVM-10git.so" )
 
 # Import target "llvm-size" for configuration "Release"
 set_property(TARGET llvm-size APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -1355,12 +1345,12 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_opt "${_IMPORT_PREFIX}/bin/opt" )
 # Import target "Remarks" for configuration "Release"
 set_property(TARGET Remarks APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(Remarks PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libRemarks.so.10svn"
-  IMPORTED_SONAME_RELEASE "libRemarks.so.10svn"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libRemarks.so.10git"
+  IMPORTED_SONAME_RELEASE "libRemarks.so.10git"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS Remarks )
-list(APPEND _IMPORT_CHECK_FILES_FOR_Remarks "${_IMPORT_PREFIX}/lib64/libRemarks.so.10svn" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_Remarks "${_IMPORT_PREFIX}/lib64/libRemarks.so.10git" )
 
 # Import target "sancov" for configuration "Release"
 set_property(TARGET sancov APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -1397,6 +1387,16 @@ set_target_properties(yaml2obj PROPERTIES
 
 list(APPEND _IMPORT_CHECK_TARGETS yaml2obj )
 list(APPEND _IMPORT_CHECK_FILES_FOR_yaml2obj "${_IMPORT_PREFIX}/bin/yaml2obj" )
+
+# Import target "ExampleIRTransforms" for configuration "Release"
+set_property(TARGET ExampleIRTransforms APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(ExampleIRTransforms PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libExampleIRTransforms.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS ExampleIRTransforms )
+list(APPEND _IMPORT_CHECK_FILES_FOR_ExampleIRTransforms "${_IMPORT_PREFIX}/lib64/libExampleIRTransforms.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

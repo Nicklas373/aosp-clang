@@ -35,4 +35,6 @@
 /* #undef HAVE_LIBCOMPRESSION */
 #endif
 
+#define LLDB_ENABLE_LZMA 0
+
 #endif // #ifndef LLDB_HOST_CONFIG_H
