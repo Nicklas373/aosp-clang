@@ -8,3 +8,4 @@ This is only cloned prebuilt Clang by Google, just grab it on specific branch if
                 - Clang 9.0.8 r365631c (build 5900059) Build 20190930 (GMT+7)
                 - Clang 10.0.1 r370808 (build 6051079) Build 20200112 (GMT+7)
                 - Clang 10.0.2 r370808 (build 6170260) Build 20200203 (GMT+7)
+                - Clang 10.0.3 r377782 (build 6189010) Build 20200208 (GMT+7) 
