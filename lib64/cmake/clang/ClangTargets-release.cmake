@@ -328,11 +328,11 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_clangFormat "${_IMPORT_PREFIX}/lib64/libclan
 # Import target "clang" for configuration "Release"
 set_property(TARGET clang APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clang PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/bin/clang-10"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/bin/clang-11"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS clang )
-list(APPEND _IMPORT_CHECK_FILES_FOR_clang "${_IMPORT_PREFIX}/bin/clang-10" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clang "${_IMPORT_PREFIX}/bin/clang-11" )
 
 # Import target "clang-format" for configuration "Release"
 set_property(TARGET clang-format APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -420,12 +420,12 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_clang-refactor "${_IMPORT_PREFIX}/bin/clang-
 # Import target "clang-cpp" for configuration "Release"
 set_property(TARGET clang-cpp APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clang-cpp PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang-cpp.so.10git"
-  IMPORTED_SONAME_RELEASE "libclang-cpp.so.10git"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang-cpp.so.11git"
+  IMPORTED_SONAME_RELEASE "libclang-cpp.so.11git"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS clang-cpp )
-list(APPEND _IMPORT_CHECK_FILES_FOR_clang-cpp "${_IMPORT_PREFIX}/lib64/libclang-cpp.so.10git" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clang-cpp "${_IMPORT_PREFIX}/lib64/libclang-cpp.so.11git" )
 
 # Import target "clang-check" for configuration "Release"
 set_property(TARGET clang-check APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -722,6 +722,16 @@ set_target_properties(clangTidyPlugin PROPERTIES
 list(APPEND _IMPORT_CHECK_TARGETS clangTidyPlugin )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangTidyPlugin "${_IMPORT_PREFIX}/lib64/libclangTidyPlugin.a" )
 
+# Import target "clangTidyMain" for configuration "Release"
+set_property(TARGET clangTidyMain APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangTidyMain PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangTidyMain.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangTidyMain )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangTidyMain "${_IMPORT_PREFIX}/lib64/libclangTidyMain.a" )
+
 # Import target "clang-tidy" for configuration "Release"
 set_property(TARGET clang-tidy APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clang-tidy PROPERTIES
@@ -906,22 +916,22 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_clangd "${_IMPORT_PREFIX}/bin/clangd" )
 # Import target "libclang" for configuration "Release"
 set_property(TARGET libclang APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(libclang PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang.so.10"
-  IMPORTED_SONAME_RELEASE "libclang.so.10git"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang.so.11"
+  IMPORTED_SONAME_RELEASE "libclang.so.11git"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS libclang )
-list(APPEND _IMPORT_CHECK_FILES_FOR_libclang "${_IMPORT_PREFIX}/lib64/libclang.so.10" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_libclang "${_IMPORT_PREFIX}/lib64/libclang.so.11" )
 
 # Import target "libclang_cxx" for configuration "Release"
 set_property(TARGET libclang_cxx APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(libclang_cxx PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang_cxx.so.10"
-  IMPORTED_SONAME_RELEASE "libclang_cxx.so.10git"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang_cxx.so.11"
+  IMPORTED_SONAME_RELEASE "libclang_cxx.so.11git"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS libclang_cxx )
-list(APPEND _IMPORT_CHECK_FILES_FOR_libclang_cxx "${_IMPORT_PREFIX}/lib64/libclang_cxx.so.10" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_libclang_cxx "${_IMPORT_PREFIX}/lib64/libclang_cxx.so.11" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

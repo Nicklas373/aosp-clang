@@ -210,7 +210,7 @@ class DWARFUnit {
   StringRef StringSection;
   const DWARFSection &StringOffsetSection;
   const DWARFSection *AddrOffsetSection;
-  uint32_t AddrOffsetSectionBase = 0;
+  Optional<uint64_t> AddrOffsetSectionBase;
   bool isLittleEndian;
   bool IsDWO;
   const DWARFUnitVector &UnitVector;
@@ -371,26 +371,6 @@ public:
     return false;
   }
 
-  /// Return the number of bytes for the header of a unit of
-  /// UnitType type.
-  ///
-  /// This function must be called with a valid unit type which in
-  /// DWARF5 is defined as one of the following six types.
-  static uint32_t getDWARF5HeaderSize(uint8_t UnitType) {
-    switch (UnitType) {
-    case dwarf::DW_UT_compile:
-    case dwarf::DW_UT_partial:
-      return 12;
-    case dwarf::DW_UT_skeleton:
-    case dwarf::DW_UT_split_compile:
-      return 20;
-    case dwarf::DW_UT_type:
-    case dwarf::DW_UT_split_type:
-      return 24;
-    }
-    llvm_unreachable("Invalid UnitType.");
-  }
-
   llvm::Optional<object::SectionedAddress> getBaseAddress();
 
   DWARFDie getUnitDIE(bool ExtractUnitDIEOnly = true) {
@@ -427,14 +407,18 @@ public:
   /// an entry in the rangelist table's offset array and is supplied by
   /// DW_FORM_rnglistx.
   Optional<uint64_t> getRnglistOffset(uint32_t Index) {
-    if (RngListTable)
-      return RngListTable->getOffsetEntry(Index);
+    if (!RngListTable)
+      return None;
+    if (Optional<uint64_t> Off = RngListTable->getOffsetEntry(Index))
+      return *Off + RangeSectionBase;
     return None;
   }
 
   Optional<uint64_t> getLoclistOffset(uint32_t Index) {
-    if (LoclistTableHeader)
-      return LoclistTableHeader->getOffsetEntry(Index);
+    if (!LoclistTableHeader)
+      return None;
+    if (Optional<uint64_t> Off = LoclistTableHeader->getOffsetEntry(Index))
+      return *Off + getLocSectionBase();
     return None;
   }
   Expected<DWARFAddressRangesVector> collectAddressRanges();

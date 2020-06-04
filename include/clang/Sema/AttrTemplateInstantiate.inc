@@ -63,6 +63,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       }
         return new (C) AcquireCapabilityAttr(C, *A, tempInstArgs, A->args_size());
     }
+    case attr::AcquireHandle: {
+      const auto *A = cast<AcquireHandleAttr>(At);
+      return A->clone(C);
+    }
     case attr::AcquiredAfter: {
       const auto *A = cast<AcquiredAfterAttr>(At);
       auto *tempInstArgs = new (C, 16) Expr *[A->args_size()];
@@ -161,6 +165,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<ArmMveAliasAttr>(At);
       return A->clone(C);
     }
+    case attr::ArmMveStrictPolymorphism: {
+      const auto *A = cast<ArmMveStrictPolymorphismAttr>(At);
+      return A->clone(C);
+    }
     case attr::Artificial: {
       const auto *A = cast<ArtificialAttr>(At);
       return A->clone(C);
@@ -244,6 +252,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::CFConsumed: {
       const auto *A = cast<CFConsumedAttr>(At);
+      return A->clone(C);
+    }
+    case attr::CFGuard: {
+      const auto *A = cast<CFGuardAttr>(At);
       return A->clone(C);
     }
     case attr::CFICanonicalJumpTable: {
@@ -998,6 +1010,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<PassObjectSizeAttr>(At);
       return A->clone(C);
     }
+    case attr::PatchableFunctionEntry: {
+      const auto *A = cast<PatchableFunctionEntryAttr>(At);
+      return A->clone(C);
+    }
     case attr::Pcs: {
       const auto *A = cast<PcsAttr>(At);
       return A->clone(C);
@@ -1087,6 +1103,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       }
         return new (C) ReleaseCapabilityAttr(C, *A, tempInstArgs, A->args_size());
     }
+    case attr::ReleaseHandle: {
+      const auto *A = cast<ReleaseHandleAttr>(At);
+      return A->clone(C);
+    }
     case attr::RenderScriptKernel: {
       const auto *A = cast<RenderScriptKernelAttr>(At);
       return A->clone(C);
@@ -1128,6 +1148,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::SPtr: {
       const auto *A = cast<SPtrAttr>(At);
+      return A->clone(C);
+    }
+    case attr::SYCLKernel: {
+      const auto *A = cast<SYCLKernelAttr>(At);
       return A->clone(C);
     }
     case attr::ScopedLockable: {
@@ -1287,6 +1311,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<UnusedAttr>(At);
       return A->clone(C);
     }
+    case attr::UseHandle: {
+      const auto *A = cast<UseHandleAttr>(At);
+      return A->clone(C);
+    }
     case attr::Used: {
       const auto *A = cast<UsedAttr>(At);
       return A->clone(C);
@@ -1328,6 +1356,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::WeakRef: {
       const auto *A = cast<WeakRefAttr>(At);
+      return A->clone(C);
+    }
+    case attr::WebAssemblyExportName: {
+      const auto *A = cast<WebAssemblyExportNameAttr>(At);
       return A->clone(C);
     }
     case attr::WebAssemblyImportModule: {
@@ -1394,6 +1426,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::AcquireCapability: {
       return nullptr;
     }
+    case attr::AcquireHandle: {
+      return nullptr;
+    }
     case attr::AcquiredAfter: {
       return nullptr;
     }
@@ -1451,6 +1486,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::ArmMveAlias: {
       return nullptr;
     }
+    case attr::ArmMveStrictPolymorphism: {
+      return nullptr;
+    }
     case attr::Artificial: {
       return nullptr;
     }
@@ -1488,6 +1526,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::CFConsumed: {
+      return nullptr;
+    }
+    case attr::CFGuard: {
       return nullptr;
     }
     case attr::CFICanonicalJumpTable: {
@@ -2017,6 +2058,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::PassObjectSize: {
       return nullptr;
     }
+    case attr::PatchableFunctionEntry: {
+      return nullptr;
+    }
     case attr::Pcs: {
       return nullptr;
     }
@@ -2071,6 +2115,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::ReleaseCapability: {
       return nullptr;
     }
+    case attr::ReleaseHandle: {
+      return nullptr;
+    }
     case attr::RenderScriptKernel: {
       return nullptr;
     }
@@ -2093,6 +2140,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::SPtr: {
+      return nullptr;
+    }
+    case attr::SYCLKernel: {
       return nullptr;
     }
     case attr::ScopedLockable: {
@@ -2188,6 +2238,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::Unused: {
       return nullptr;
     }
+    case attr::UseHandle: {
+      return nullptr;
+    }
     case attr::Used: {
       return nullptr;
     }
@@ -2219,6 +2272,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::WeakRef: {
+      return nullptr;
+    }
+    case attr::WebAssemblyExportName: {
       return nullptr;
     }
     case attr::WebAssemblyImportModule: {

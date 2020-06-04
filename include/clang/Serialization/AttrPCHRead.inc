@@ -106,6 +106,15 @@
     New->setImplicit(isImplicit);
     break;
   }
+  case attr::AcquireHandle: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    std::string handleType= Record.readString();
+    New = new (Context) AcquireHandleAttr(Context, Info, handleType);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
   case attr::AcquiredAfter: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
@@ -169,7 +178,7 @@
     if (isalignmentExpr)
       alignmentPtr = Record.readExpr();
     else
-      alignmentPtr = Record.getTypeSourceInfo();
+      alignmentPtr = Record.readTypeSourceInfo();
     New = new (Context) AlignedAttr(Context, Info, isalignmentExpr, alignmentPtr);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -262,7 +271,7 @@
   case attr::ArgumentWithTypeTag: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * argumentKind = Record.getIdentifierInfo();
+    IdentifierInfo * argumentKind = Record.readIdentifier();
     ParamIdx argumentIdx = ParamIdx::deserialize(Record.readInt());
     ParamIdx typeTagIdx = ParamIdx::deserialize(Record.readInt());
     bool isPointer = Record.readInt();
@@ -274,9 +283,15 @@
   case attr::ArmMveAlias: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * builtinName = Record.getIdentifierInfo();
+    IdentifierInfo * builtinName = Record.readIdentifier();
     New = new (Context) ArmMveAliasAttr(Context, Info, builtinName);
     cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
+  case attr::ArmMveStrictPolymorphism: {
+    bool isImplicit = Record.readInt();
+    New = new (Context) ArmMveStrictPolymorphismAttr(Context, Info);
     New->setImplicit(isImplicit);
     break;
   }
@@ -350,7 +365,7 @@
   case attr::Availability: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * platform = Record.getIdentifierInfo();
+    IdentifierInfo * platform = Record.readIdentifier();
     VersionTuple introduced= Record.readVersionTuple();
     VersionTuple deprecated= Record.readVersionTuple();
     VersionTuple obsoleted= Record.readVersionTuple();
@@ -413,6 +428,15 @@
     New->setImplicit(isImplicit);
     break;
   }
+  case attr::CFGuard: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    CFGuardAttr::GuardArg guard(static_cast<CFGuardAttr::GuardArg>(Record.readInt()));
+    New = new (Context) CFGuardAttr(Context, Info, guard);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
   case attr::CFICanonicalJumpTable: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
@@ -452,7 +476,7 @@
     SmallVector<IdentifierInfo *, 4> cpus;
     cpus.reserve(cpusSize);
     for (unsigned i = 0; i != cpusSize; ++i)
-      cpus.push_back(Record.getIdentifierInfo());
+      cpus.push_back(Record.readIdentifier());
     New = new (Context) CPUDispatchAttr(Context, Info, cpus.data(), cpusSize);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -465,7 +489,7 @@
     SmallVector<IdentifierInfo *, 4> cpus;
     cpus.reserve(cpusSize);
     for (unsigned i = 0; i != cpusSize; ++i)
-      cpus.push_back(Record.getIdentifierInfo());
+      cpus.push_back(Record.readIdentifier());
     New = new (Context) CPUSpecificAttr(Context, Info, cpus.data(), cpusSize);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -853,7 +877,7 @@
   case attr::Format: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * type = Record.getIdentifierInfo();
+    IdentifierInfo * type = Record.readIdentifier();
     int formatIdx = Record.readInt();
     int firstArg = Record.readInt();
     New = new (Context) FormatAttr(Context, Info, type, formatIdx, firstArg);
@@ -930,7 +954,7 @@
   case attr::IBOutletCollection: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    TypeSourceInfo * interface_ = Record.getTypeSourceInfo();
+    TypeSourceInfo * interface_ = Record.readTypeSourceInfo();
     New = new (Context) IBOutletCollectionAttr(Context, Info, interface_);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -1175,7 +1199,7 @@
   }
   case attr::Mode: {
     bool isImplicit = Record.readInt();
-    IdentifierInfo * mode = Record.getIdentifierInfo();
+    IdentifierInfo * mode = Record.readIdentifier();
     New = new (Context) ModeAttr(Context, Info, mode);
     New->setImplicit(isImplicit);
     break;
@@ -1608,7 +1632,7 @@
   case attr::ObjCBridge: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * bridgedType = Record.getIdentifierInfo();
+    IdentifierInfo * bridgedType = Record.readIdentifier();
     New = new (Context) ObjCBridgeAttr(Context, Info, bridgedType);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -1617,7 +1641,7 @@
   case attr::ObjCBridgeMutable: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * bridgedType = Record.getIdentifierInfo();
+    IdentifierInfo * bridgedType = Record.readIdentifier();
     New = new (Context) ObjCBridgeMutableAttr(Context, Info, bridgedType);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -1626,9 +1650,9 @@
   case attr::ObjCBridgeRelated: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * relatedClass = Record.getIdentifierInfo();
-    IdentifierInfo * classMethod = Record.getIdentifierInfo();
-    IdentifierInfo * instanceMethod = Record.getIdentifierInfo();
+    IdentifierInfo * relatedClass = Record.readIdentifier();
+    IdentifierInfo * classMethod = Record.readIdentifier();
+    IdentifierInfo * instanceMethod = Record.readIdentifier();
     New = new (Context) ObjCBridgeRelatedAttr(Context, Info, relatedClass, classMethod, instanceMethod);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -1684,7 +1708,7 @@
   }
   case attr::ObjCGC: {
     bool isImplicit = Record.readInt();
-    IdentifierInfo * kind = Record.getIdentifierInfo();
+    IdentifierInfo * kind = Record.readIdentifier();
     New = new (Context) ObjCGCAttr(Context, Info, kind);
     New->setImplicit(isImplicit);
     break;
@@ -1735,7 +1759,7 @@
   case attr::ObjCOwnership: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * kind = Record.getIdentifierInfo();
+    IdentifierInfo * kind = Record.readIdentifier();
     New = new (Context) ObjCOwnershipAttr(Context, Info, kind);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -1889,7 +1913,7 @@
   case attr::Owner: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    TypeSourceInfo * derefType = Record.getTypeSourceInfo();
+    TypeSourceInfo * derefType = Record.readTypeSourceInfo();
     New = new (Context) OwnerAttr(Context, Info, derefType);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -1898,7 +1922,7 @@
   case attr::Ownership: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * module = Record.getIdentifierInfo();
+    IdentifierInfo * module = Record.readIdentifier();
     unsigned argsSize = Record.readInt();
     SmallVector<ParamIdx, 4> args;
     args.reserve(argsSize);
@@ -1943,6 +1967,16 @@
     New->setImplicit(isImplicit);
     break;
   }
+  case attr::PatchableFunctionEntry: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    unsigned count = Record.readInt();
+    int offset = Record.readInt();
+    New = new (Context) PatchableFunctionEntryAttr(Context, Info, count, offset);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
   case attr::Pcs: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
@@ -1955,7 +1989,7 @@
   case attr::Pointer: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    TypeSourceInfo * derefType = Record.getTypeSourceInfo();
+    TypeSourceInfo * derefType = Record.readTypeSourceInfo();
     New = new (Context) PointerAttr(Context, Info, derefType);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -2097,6 +2131,15 @@
     New->setImplicit(isImplicit);
     break;
   }
+  case attr::ReleaseHandle: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    std::string handleType= Record.readString();
+    New = new (Context) ReleaseHandleAttr(Context, Info, handleType);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
   case attr::RenderScriptKernel: {
     bool isImplicit = Record.readInt();
     New = new (Context) RenderScriptKernelAttr(Context, Info);
@@ -2163,6 +2206,14 @@
   case attr::SPtr: {
     bool isImplicit = Record.readInt();
     New = new (Context) SPtrAttr(Context, Info);
+    New->setImplicit(isImplicit);
+    break;
+  }
+  case attr::SYCLKernel: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    New = new (Context) SYCLKernelAttr(Context, Info);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
     break;
   }
@@ -2387,8 +2438,8 @@
   case attr::TypeTagForDatatype: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    IdentifierInfo * argumentKind = Record.getIdentifierInfo();
-    TypeSourceInfo * matchingCType = Record.getTypeSourceInfo();
+    IdentifierInfo * argumentKind = Record.readIdentifier();
+    TypeSourceInfo * matchingCType = Record.readTypeSourceInfo();
     bool layoutCompatible = Record.readInt();
     bool mustBeNull = Record.readInt();
     New = new (Context) TypeTagForDatatypeAttr(Context, Info, argumentKind, matchingCType, layoutCompatible, mustBeNull);
@@ -2437,6 +2488,15 @@
     New->setImplicit(isImplicit);
     break;
   }
+  case attr::UseHandle: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    std::string handleType= Record.readString();
+    New = new (Context) UseHandleAttr(Context, Info, handleType);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
   case attr::Used: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
@@ -2465,7 +2525,7 @@
   case attr::VecTypeHint: {
     bool isInherited = Record.readInt();
     bool isImplicit = Record.readInt();
-    TypeSourceInfo * typeHint = Record.getTypeSourceInfo();
+    TypeSourceInfo * typeHint = Record.readTypeSourceInfo();
     New = new (Context) VecTypeHintAttr(Context, Info, typeHint);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
@@ -2526,6 +2586,15 @@
     bool isImplicit = Record.readInt();
     std::string aliasee= Record.readString();
     New = new (Context) WeakRefAttr(Context, Info, aliasee);
+    cast<InheritableAttr>(New)->setInherited(isInherited);
+    New->setImplicit(isImplicit);
+    break;
+  }
+  case attr::WebAssemblyExportName: {
+    bool isInherited = Record.readInt();
+    bool isImplicit = Record.readInt();
+    std::string exportName= Record.readString();
+    New = new (Context) WebAssemblyExportNameAttr(Context, Info, exportName);
     cast<InheritableAttr>(New)->setInherited(isInherited);
     New->setImplicit(isImplicit);
     break;

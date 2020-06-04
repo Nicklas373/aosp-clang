@@ -171,13 +171,6 @@ function(llvm_expand_pseudo_components out_components)
           list(APPEND expanded_components "${t}CodeGen")
         endif()
       endforeach(t)
-    elseif( c STREQUAL "AllTargetsAsmPrinters" )
-      # Link all the asm printers from all the targets
-      foreach(t ${LLVM_TARGETS_TO_BUILD})
-        if( TARGET LLVM${t}AsmPrinter )
-          list(APPEND expanded_components "${t}AsmPrinter")
-        endif()
-      endforeach(t)
     elseif( c STREQUAL "AllTargetsAsmParsers" )
       # Link all the asm parsers from all the targets
       foreach(t ${LLVM_TARGETS_TO_BUILD})
@@ -267,7 +260,8 @@ function(llvm_map_components_to_libnames out_libs)
     elseif( c STREQUAL "engine" )
       # already processed
     elseif( c STREQUAL "all" )
-      list(APPEND expanded_components ${LLVM_AVAILABLE_LIBS})
+      get_property(all_components GLOBAL PROPERTY LLVM_COMPONENT_LIBS)
+      list(APPEND expanded_components ${all_components})
     else()
       # Canonize the component name:
       string(TOUPPER "${c}" capitalized)

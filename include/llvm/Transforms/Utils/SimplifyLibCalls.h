@@ -60,6 +60,7 @@ private:
   /// Str/Stp cpy are similar enough to be handled in the same functions.
   Value *optimizeStrpCpyChk(CallInst *CI, IRBuilder<> &B, LibFunc Func);
   Value *optimizeStrpNCpyChk(CallInst *CI, IRBuilder<> &B, LibFunc Func);
+  Value *optimizeStrLenChk(CallInst *CI, IRBuilder<> &B);
   Value *optimizeMemCCpyChk(CallInst *CI, IRBuilder<> &B);
   Value *optimizeSNPrintfChk(CallInst *CI, IRBuilder<> &B);
   Value *optimizeSPrintfChk(CallInst *CI,IRBuilder<> &B);
@@ -175,6 +176,7 @@ private:
   Value *optimizeMemCmp(CallInst *CI, IRBuilder<> &B);
   Value *optimizeBCmp(CallInst *CI, IRBuilder<> &B);
   Value *optimizeMemCmpBCmpCommon(CallInst *CI, IRBuilder<> &B);
+  Value *optimizeMemCCpy(CallInst *CI, IRBuilder<> &B);
   Value *optimizeMemPCpy(CallInst *CI, IRBuilder<> &B);
   Value *optimizeMemCpy(CallInst *CI, IRBuilder<> &B);
   Value *optimizeMemMove(CallInst *CI, IRBuilder<> &B);

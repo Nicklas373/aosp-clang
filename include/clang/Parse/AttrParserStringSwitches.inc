@@ -42,6 +42,7 @@
 .Case("__clang_arm_mve_alias", true)
 .Case("availability", true)
 .Case("blocks", true)
+.Case("guard", true)
 .Case("callable_when", true)
 .Case("consumable", true)
 .Case("enum_extensibility", true)

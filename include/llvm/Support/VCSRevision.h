@@ -1,2 +1,2 @@
-#define LLVM_REVISION "0cb1afdb060d6619a9837ab6866cf4adf2336416"
-#define LLVM_REPOSITORY "/buildbot/tmp/tmplbWaUb"
+#define LLVM_REVISION "b397f81060ce6d701042b782172ed13bee898b79"
+#define LLVM_REPOSITORY "/buildbot/tmp/tmp6_m7QH"

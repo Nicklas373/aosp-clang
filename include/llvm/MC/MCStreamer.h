@@ -103,8 +103,9 @@ public:
   // Allow a target to add behavior to the emitAssignment of MCStreamer.
   virtual void emitAssignment(MCSymbol *Symbol, const MCExpr *Value);
 
-  virtual void prettyPrintAsm(MCInstPrinter &InstPrinter, raw_ostream &OS,
-                              const MCInst &Inst, const MCSubtargetInfo &STI);
+  virtual void prettyPrintAsm(MCInstPrinter &InstPrinter, uint64_t Address,
+                              const MCInst &Inst, const MCSubtargetInfo &STI,
+                              raw_ostream &OS);
 
   virtual void emitDwarfFileDirective(StringRef Directive);
 
@@ -154,7 +155,7 @@ public:
                                     StringRef StringValue = "");
   virtual void emitFPU(unsigned FPU);
   virtual void emitArch(ARM::ArchKind Arch);
-  virtual void emitArchExtension(unsigned ArchExt);
+  virtual void emitArchExtension(uint64_t ArchExt);
   virtual void emitObjectArch(ARM::ArchKind Arch);
   void emitTargetAttributes(const MCSubtargetInfo &STI);
   virtual void finishAttributeSection();
@@ -222,6 +223,13 @@ class MCStreamer {
 
   bool UseAssemblerInfoForParsing;
 
+  /// Is the assembler allowed to insert padding automatically?  For
+  /// correctness reasons, we sometimes need to ensure instructions aren't
+  /// seperated in unexpected ways.  At the moment, this feature is only
+  /// useable from an integrated assembler, but assembly syntax is under
+  /// discussion for future inclusion.
+  bool AllowAutoPadding = false;
+
 protected:
   MCStreamer(MCContext &Ctx);
 
@@ -265,6 +273,9 @@ public:
   MCTargetStreamer *getTargetStreamer() {
     return TargetStreamer.get();
   }
+
+  void setAllowAutoPadding(bool v) { AllowAutoPadding = v; }
+  bool getAllowAutoPadding() const { return AllowAutoPadding; }
 
   /// When emitting an object file, create and emit a real label. When emitting
   /// textual assembly, this should do nothing to avoid polluting our output.
@@ -649,6 +660,13 @@ public:
   /// in a MCExpr for constant integers & prints in Hex format for certain
   /// modes.
   virtual void EmitIntValueInHex(uint64_t Value, unsigned Size) {
+    EmitIntValue(Value, Size);
+  }
+
+  /// Special case of EmitValue that avoids the client having to pass
+  /// in a MCExpr for constant integers & prints in Hex format for certain
+  /// modes, pads the field with leading zeros to Size width
+  virtual void EmitIntValueInHexWithPadding(uint64_t Value, unsigned Size) {
     EmitIntValue(Value, Size);
   }
 

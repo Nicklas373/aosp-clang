@@ -79,6 +79,13 @@ Record.push_back(SA->getInterrupt());
       Record.AddStmt(Val);
     break;
   }
+  case attr::AcquireHandle: {
+    const auto *SA = cast<AcquireHandleAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.AddString(SA->getHandleType());
+    break;
+  }
   case attr::AcquiredAfter: {
     const auto *SA = cast<AcquiredAfterAttr>(A);
     Record.push_back(SA->isInherited());
@@ -213,6 +220,10 @@ Record.push_back(SA->getInterrupt());
     Record.AddIdentifierRef(SA->getBuiltinName());
     break;
   }
+  case attr::ArmMveStrictPolymorphism: {
+    Record.push_back(A->isImplicit());
+    break;
+  }
   case attr::Artificial: {
     const auto *SA = cast<ArtificialAttr>(A);
     Record.push_back(SA->isInherited());
@@ -312,6 +323,13 @@ Record.push_back(SA->getType());
     const auto *SA = cast<CFConsumedAttr>(A);
     Record.push_back(SA->isInherited());
     Record.push_back(A->isImplicit());
+    break;
+  }
+  case attr::CFGuard: {
+    const auto *SA = cast<CFGuardAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+Record.push_back(SA->getGuard());
     break;
   }
   case attr::CFICanonicalJumpTable: {
@@ -1446,6 +1464,14 @@ Record.push_back(SA->getParamState());
     Record.push_back(SA->getType());
     break;
   }
+  case attr::PatchableFunctionEntry: {
+    const auto *SA = cast<PatchableFunctionEntryAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.push_back(SA->getCount());
+    Record.push_back(SA->getOffset());
+    break;
+  }
   case attr::Pcs: {
     const auto *SA = cast<PcsAttr>(A);
     Record.push_back(SA->isInherited());
@@ -1562,6 +1588,13 @@ Record.push_back(SA->getInterrupt());
       Record.AddStmt(Val);
     break;
   }
+  case attr::ReleaseHandle: {
+    const auto *SA = cast<ReleaseHandleAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.AddString(SA->getHandleType());
+    break;
+  }
   case attr::RenderScriptKernel: {
     Record.push_back(A->isImplicit());
     break;
@@ -1610,6 +1643,12 @@ Record.push_back(SA->getState());
     break;
   }
   case attr::SPtr: {
+    Record.push_back(A->isImplicit());
+    break;
+  }
+  case attr::SYCLKernel: {
+    const auto *SA = cast<SYCLKernelAttr>(A);
+    Record.push_back(SA->isInherited());
     Record.push_back(A->isImplicit());
     break;
   }
@@ -1813,6 +1852,13 @@ Record.push_back(SA->getImplicitReason());
     Record.push_back(A->isImplicit());
     break;
   }
+  case attr::UseHandle: {
+    const auto *SA = cast<UseHandleAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.AddString(SA->getHandleType());
+    break;
+  }
   case attr::Used: {
     const auto *SA = cast<UsedAttr>(A);
     Record.push_back(SA->isInherited());
@@ -1882,6 +1928,13 @@ Record.push_back(SA->getVisibility());
     Record.push_back(SA->isInherited());
     Record.push_back(A->isImplicit());
     Record.AddString(SA->getAliasee());
+    break;
+  }
+  case attr::WebAssemblyExportName: {
+    const auto *SA = cast<WebAssemblyExportNameAttr>(A);
+    Record.push_back(SA->isInherited());
+    Record.push_back(A->isImplicit());
+    Record.AddString(SA->getExportName());
     break;
   }
   case attr::WebAssemblyImportModule: {

@@ -188,6 +188,10 @@ public:
 
     eCore_arc, // little endian ARC
 
+    eCore_avr,
+
+    eCore_wasm32,
+
     kNumCores,
 
     kCore_invalid,
@@ -433,7 +437,7 @@ public:
   /// \return A triple describing this ArchSpec.
   const llvm::Triple &GetTriple() const { return m_triple; }
 
-  void DumpTriple(Stream &s) const;
+  void DumpTriple(llvm::raw_ostream &s) const;
 
   /// Architecture triple setter.
   ///

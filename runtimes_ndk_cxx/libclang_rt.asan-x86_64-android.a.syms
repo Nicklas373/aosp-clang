@@ -156,6 +156,7 @@
   __interceptor_puts;
   __interceptor_pvalloc;
   __interceptor_pwrite;
+  __interceptor_qsort;
   __interceptor_read;
   __interceptor_readdir;
   __interceptor_readdir_r;
@@ -195,6 +196,7 @@
   __interceptor_setlocale;
   __interceptor_setvbuf;
   __interceptor_sigaction;
+  __interceptor_sigaltstack;
   __interceptor_siglongjmp;
   __interceptor_signal;
   __interceptor_sigpending;
@@ -573,6 +575,7 @@
   __sanitizer_syscall_post_impl_shmget;
   __sanitizer_syscall_post_impl_shutdown;
   __sanitizer_syscall_post_impl_sigaction;
+  __sanitizer_syscall_post_impl_sigaltstack;
   __sanitizer_syscall_post_impl_signal;
   __sanitizer_syscall_post_impl_signalfd;
   __sanitizer_syscall_post_impl_signalfd4;
@@ -880,6 +883,7 @@
   __sanitizer_syscall_pre_impl_shmget;
   __sanitizer_syscall_pre_impl_shutdown;
   __sanitizer_syscall_pre_impl_sigaction;
+  __sanitizer_syscall_pre_impl_sigaltstack;
   __sanitizer_syscall_pre_impl_signal;
   __sanitizer_syscall_pre_impl_signalfd;
   __sanitizer_syscall_pre_impl_signalfd4;
@@ -1099,6 +1103,7 @@
   puts;
   pvalloc;
   pwrite;
+  qsort;
   read;
   readdir;
   readdir_r;
@@ -1137,6 +1142,7 @@
   setlocale;
   setvbuf;
   sigaction;
+  sigaltstack;
   siglongjmp;
   signal;
   sigpending;

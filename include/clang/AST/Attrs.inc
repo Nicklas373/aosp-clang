@@ -589,6 +589,66 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::AcquireCapability; }
 };
 
+class AcquireHandleAttr : public InheritableAttr {
+unsigned handleTypeLength;
+char *handleType;
+
+public:
+  static AcquireHandleAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef HandleType, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) AcquireHandleAttr(Ctx, CommonInfo, HandleType);
+    A->setImplicit(true);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static AcquireHandleAttr *Create(ASTContext &Ctx, llvm::StringRef HandleType, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) AcquireHandleAttr(Ctx, CommonInfo, HandleType);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static AcquireHandleAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef HandleType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return CreateImplicit(Ctx, HandleType, I);
+  }
+  static AcquireHandleAttr *Create(ASTContext &Ctx, llvm::StringRef HandleType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return Create(Ctx, HandleType, I);
+  }
+  AcquireHandleAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef HandleType
+             )
+    : InheritableAttr(Ctx, CommonInfo, attr::AcquireHandle, false, false)
+              , handleTypeLength(HandleType.size()),handleType(new (Ctx, 1) char[handleTypeLength])
+  {
+      if (!HandleType.empty())
+        std::memcpy(handleType, HandleType.data(), handleTypeLength);
+  }
+
+  AcquireHandleAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  llvm::StringRef getHandleType() const {
+    return llvm::StringRef(handleType, handleTypeLength);
+  }
+  unsigned getHandleTypeLength() const {
+    return handleTypeLength;
+  }
+  void setHandleType(ASTContext &C, llvm::StringRef S) {
+    handleTypeLength = S.size();
+    this->handleType = new (C, 1) char [handleTypeLength];
+    if (!S.empty())
+      std::memcpy(this->handleType, S.data(), handleTypeLength);
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::AcquireHandle; }
+};
+
 class AcquiredAfterAttr : public InheritableAttr {
   unsigned args_Size;
   Expr * *args_;
@@ -1643,6 +1703,46 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::ArmMveAlias; }
 };
 
+class ArmMveStrictPolymorphismAttr : public TypeAttr {
+public:
+  static ArmMveStrictPolymorphismAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) ArmMveStrictPolymorphismAttr(Ctx, CommonInfo);
+    A->setImplicit(true);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static ArmMveStrictPolymorphismAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) ArmMveStrictPolymorphismAttr(Ctx, CommonInfo);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static ArmMveStrictPolymorphismAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return CreateImplicit(Ctx, I);
+  }
+  static ArmMveStrictPolymorphismAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return Create(Ctx, I);
+  }
+  ArmMveStrictPolymorphismAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+    : TypeAttr(Ctx, CommonInfo, attr::ArmMveStrictPolymorphism, false)
+  {
+  }
+
+  ArmMveStrictPolymorphismAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::ArmMveStrictPolymorphism; }
+};
+
 class ArtificialAttr : public InheritableAttr {
 public:
   static ArtificialAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
@@ -2507,6 +2607,76 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::CFConsumed; }
 };
 
+class CFGuardAttr : public InheritableAttr {
+public:
+  enum GuardArg {
+    nocf
+  };
+private:
+  GuardArg guard;
+
+public:
+  static CFGuardAttr *CreateImplicit(ASTContext &Ctx, GuardArg Guard, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) CFGuardAttr(Ctx, CommonInfo, Guard);
+    A->setImplicit(true);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static CFGuardAttr *Create(ASTContext &Ctx, GuardArg Guard, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) CFGuardAttr(Ctx, CommonInfo, Guard);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static CFGuardAttr *CreateImplicit(ASTContext &Ctx, GuardArg Guard, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return CreateImplicit(Ctx, Guard, I);
+  }
+  static CFGuardAttr *Create(ASTContext &Ctx, GuardArg Guard, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return Create(Ctx, Guard, I);
+  }
+  CFGuardAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , GuardArg Guard
+             )
+    : InheritableAttr(Ctx, CommonInfo, attr::CFGuard, false, false)
+              , guard(Guard)
+  {
+  }
+
+  CFGuardAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  GuardArg getGuard() const {
+    return guard;
+  }
+
+  static bool ConvertStrToGuardArg(StringRef Val, GuardArg &Out) {
+    Optional<GuardArg> R = llvm::StringSwitch<Optional<GuardArg>>(Val)
+      .Case("nocf", CFGuardAttr::nocf)
+      .Default(Optional<GuardArg>());
+    if (R) {
+      Out = *R;
+      return true;
+    }
+    return false;
+  }
+
+  static const char *ConvertGuardArgToStr(GuardArg Val) {
+    switch(Val) {
+    case CFGuardAttr::nocf: return "nocf";
+    }
+    llvm_unreachable("No enumerator with that value");
+  }
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::CFGuard; }
+};
+
 class CFICanonicalJumpTableAttr : public InheritableAttr {
 public:
   static CFICanonicalJumpTableAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
@@ -3358,9 +3528,6 @@ public:
   }
 
 
-    bool isMutex() const { return getName().equals_lower("mutex"); }
-    bool isRole() const { return getName().equals_lower("role"); }
-  
 
   static bool classof(const Attr *A) { return A->getKind() == attr::Capability; }
 };
@@ -6489,25 +6656,9 @@ public:
   static const bool DefaultBestCase = true;
 
 
-  static bool hasVBPtrOffsetField(Spelling Inheritance) {
-    return Inheritance == Keyword_unspecified_inheritance;
-  }
-
-  // Only member pointers to functions need a this adjustment, since it can be
-  // combined with the field offset for data pointers.
-  static bool hasNVOffsetField(bool IsMemberFunction, Spelling Inheritance) {
-    return IsMemberFunction && Inheritance >= Keyword_multiple_inheritance;
-  }
-
-  static bool hasVBTableOffsetField(Spelling Inheritance) {
-    return Inheritance >= Keyword_virtual_inheritance;
-  }
-
-  static bool hasOnlyOneField(bool IsMemberFunction,
-                              Spelling Inheritance) {
-    if (IsMemberFunction)
-      return Inheritance <= Keyword_single_inheritance;
-    return Inheritance <= Keyword_multiple_inheritance;
+  MSInheritanceModel getInheritanceModel() const {
+    // The spelling enum should agree with MSInheritanceModel.
+    return MSInheritanceModel(getSemanticSpelling());
   }
   
 
@@ -6686,13 +6837,7 @@ public:
   }
 
 
-  enum Mode {
-    Never,
-    ForVBaseOverride,
-    ForVFTable
-  };
-
-  Mode getVtorDispMode() const { return Mode(vdm); }
+  MSVtorDispMode getVtorDispMode() const { return MSVtorDispMode(vdm); }
   
 
   static bool classof(const Attr *A) { return A->getKind() == attr::MSVtorDisp; }
@@ -9128,20 +9273,40 @@ public:
       }
       // TODO: add printing of real context selectors.
       OS << " match(";
+      int Used[OMP_CTX_SET_unknown] = {0};
       for (unsigned I = 0, E = ctxSelectorSets_size(); I < E; ++I) {
         auto CtxSet = static_cast<OpenMPContextSelectorSetKind>(
             *std::next(ctxSelectorSets_begin(), I));
-        auto Ctx = static_cast<OpenMPContextSelectorKind>(
-            *std::next(ctxSelectors_begin(), I));
-        assert(CtxSet != OMP_CTX_SET_unknown && Ctx != OMP_CTX_unknown &&
-               "Unknown context selector.");
+        if (Used[CtxSet])
+          continue;
+        if (I > 0)
+          OS << ",";
         switch (CtxSet) {
         case OMP_CTX_SET_implementation:
           OS << "implementation={";
+          break;
+        case OMP_CTX_SET_device:
+          OS << "device={";
+          break;
+        case OMP_CTX_SET_unknown:
+          llvm_unreachable("Unknown context selector set.");
+        }
+        Used[CtxSet] = 1;
+        for (unsigned K = I, EK = ctxSelectors_size(); K < EK; ++K) {
+          auto CtxSetK = static_cast<OpenMPContextSelectorSetKind>(
+              *std::next(ctxSelectorSets_begin(), K));
+          if (CtxSet != CtxSetK)
+            continue;
+          if (K != I)
+            OS << ",";
+          auto Ctx = static_cast<OpenMPContextSelectorKind>(
+              *std::next(ctxSelectors_begin(), K));
           switch (Ctx) {
           case OMP_CTX_vendor:
+            assert(CtxSet == OMP_CTX_SET_implementation &&
+                   "Expected implementation context selector set.");
             OS << "vendor(";
-            printScore(OS, Policy, I);
+            printScore(OS, Policy, K);
             if (implVendors_size() > 0) {
               OS << *implVendors(). begin();
               for (StringRef VendorName : llvm::drop_begin(implVendors(), 1))
@@ -9150,16 +9315,8 @@ public:
             OS << ")";
             break;
           case OMP_CTX_kind:
-            llvm_unreachable("Unexpected context selector in implementation set.");
-          case OMP_CTX_unknown:
-            llvm_unreachable("Unknown context selector.");
-          }
-          OS << "}";
-          break;
-        case OMP_CTX_SET_device:
-          OS << "device={";
-          switch (Ctx) {
-          case OMP_CTX_kind:
+            assert(CtxSet == OMP_CTX_SET_device &&
+                   "Expected device context selector set.");
             OS << "kind(";
             if (deviceKinds_size() > 0) {
               OS << *deviceKinds().begin();
@@ -9168,18 +9325,11 @@ public:
             }
             OS << ")";
             break;
-          case OMP_CTX_vendor:
-            llvm_unreachable("Unexpected context selector in device set.");
           case OMP_CTX_unknown:
             llvm_unreachable("Unknown context selector.");
           }
-          OS << "}";
-          break;
-        case OMP_CTX_SET_unknown:
-          llvm_unreachable("Unknown context selector set.");
         }
-        if (I != E - 1)
-          OS << ",";
+        OS << "}";
       }
       OS << ")";
     }
@@ -10782,6 +10932,15 @@ public:
 
 class OpenCLConstantAddressSpaceAttr : public TypeAttr {
 public:
+  enum Spelling {
+    Keyword_constant = 0,
+    GNU_opencl_constant = 2,
+    CXX11_clang_opencl_constant = 3,
+    C2x_clang_opencl_constant = 4,
+  SpellingNotCalculated = 15
+
+  };
+
   static OpenCLConstantAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLConstantAddressSpaceAttr(Ctx, CommonInfo);
     A->setImplicit(true);
@@ -10792,17 +10951,15 @@ public:
 
   static OpenCLConstantAddressSpaceAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLConstantAddressSpaceAttr(Ctx, CommonInfo);
-    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
-      A->setAttributeSpellingListIndex(0);
     return A;
   }
 
-  static OpenCLConstantAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLConstantAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLConstantAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return CreateImplicit(Ctx, I);
   }
-  static OpenCLConstantAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLConstantAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLConstantAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return Create(Ctx, I);
   }
   OpenCLConstantAddressSpaceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
@@ -10815,6 +10972,16 @@ public:
   void printPretty(raw_ostream &OS,
                    const PrintingPolicy &Policy) const;
   const char *getSpelling() const;
+  Spelling getSemanticSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+    default: llvm_unreachable("Unknown spelling list index");
+    case 0: return Keyword_constant;
+    case 1: return Keyword_constant;
+    case 2: return GNU_opencl_constant;
+    case 3: return CXX11_clang_opencl_constant;
+    case 4: return C2x_clang_opencl_constant;
+  }
+  }
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::OpenCLConstantAddressSpace; }
@@ -10822,6 +10989,15 @@ public:
 
 class OpenCLGenericAddressSpaceAttr : public TypeAttr {
 public:
+  enum Spelling {
+    Keyword_generic = 0,
+    GNU_opencl_generic = 2,
+    CXX11_clang_opencl_generic = 3,
+    C2x_clang_opencl_generic = 4,
+  SpellingNotCalculated = 15
+
+  };
+
   static OpenCLGenericAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLGenericAddressSpaceAttr(Ctx, CommonInfo);
     A->setImplicit(true);
@@ -10832,17 +11008,15 @@ public:
 
   static OpenCLGenericAddressSpaceAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLGenericAddressSpaceAttr(Ctx, CommonInfo);
-    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
-      A->setAttributeSpellingListIndex(0);
     return A;
   }
 
-  static OpenCLGenericAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLGenericAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLGenericAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return CreateImplicit(Ctx, I);
   }
-  static OpenCLGenericAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLGenericAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLGenericAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return Create(Ctx, I);
   }
   OpenCLGenericAddressSpaceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
@@ -10855,6 +11029,16 @@ public:
   void printPretty(raw_ostream &OS,
                    const PrintingPolicy &Policy) const;
   const char *getSpelling() const;
+  Spelling getSemanticSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+    default: llvm_unreachable("Unknown spelling list index");
+    case 0: return Keyword_generic;
+    case 1: return Keyword_generic;
+    case 2: return GNU_opencl_generic;
+    case 3: return CXX11_clang_opencl_generic;
+    case 4: return C2x_clang_opencl_generic;
+  }
+  }
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::OpenCLGenericAddressSpace; }
@@ -10862,6 +11046,15 @@ public:
 
 class OpenCLGlobalAddressSpaceAttr : public TypeAttr {
 public:
+  enum Spelling {
+    Keyword_global = 0,
+    GNU_opencl_global = 2,
+    CXX11_clang_opencl_global = 3,
+    C2x_clang_opencl_global = 4,
+  SpellingNotCalculated = 15
+
+  };
+
   static OpenCLGlobalAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLGlobalAddressSpaceAttr(Ctx, CommonInfo);
     A->setImplicit(true);
@@ -10872,17 +11065,15 @@ public:
 
   static OpenCLGlobalAddressSpaceAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLGlobalAddressSpaceAttr(Ctx, CommonInfo);
-    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
-      A->setAttributeSpellingListIndex(0);
     return A;
   }
 
-  static OpenCLGlobalAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLGlobalAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLGlobalAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return CreateImplicit(Ctx, I);
   }
-  static OpenCLGlobalAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLGlobalAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLGlobalAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return Create(Ctx, I);
   }
   OpenCLGlobalAddressSpaceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
@@ -10895,6 +11086,16 @@ public:
   void printPretty(raw_ostream &OS,
                    const PrintingPolicy &Policy) const;
   const char *getSpelling() const;
+  Spelling getSemanticSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+    default: llvm_unreachable("Unknown spelling list index");
+    case 0: return Keyword_global;
+    case 1: return Keyword_global;
+    case 2: return GNU_opencl_global;
+    case 3: return CXX11_clang_opencl_global;
+    case 4: return C2x_clang_opencl_global;
+  }
+  }
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::OpenCLGlobalAddressSpace; }
@@ -10990,6 +11191,15 @@ public:
 
 class OpenCLLocalAddressSpaceAttr : public TypeAttr {
 public:
+  enum Spelling {
+    Keyword_local = 0,
+    GNU_opencl_local = 2,
+    CXX11_clang_opencl_local = 3,
+    C2x_clang_opencl_local = 4,
+  SpellingNotCalculated = 15
+
+  };
+
   static OpenCLLocalAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLLocalAddressSpaceAttr(Ctx, CommonInfo);
     A->setImplicit(true);
@@ -11000,17 +11210,15 @@ public:
 
   static OpenCLLocalAddressSpaceAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLLocalAddressSpaceAttr(Ctx, CommonInfo);
-    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
-      A->setAttributeSpellingListIndex(0);
     return A;
   }
 
-  static OpenCLLocalAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLLocalAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLLocalAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return CreateImplicit(Ctx, I);
   }
-  static OpenCLLocalAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLLocalAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLLocalAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return Create(Ctx, I);
   }
   OpenCLLocalAddressSpaceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
@@ -11023,6 +11231,16 @@ public:
   void printPretty(raw_ostream &OS,
                    const PrintingPolicy &Policy) const;
   const char *getSpelling() const;
+  Spelling getSemanticSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+    default: llvm_unreachable("Unknown spelling list index");
+    case 0: return Keyword_local;
+    case 1: return Keyword_local;
+    case 2: return GNU_opencl_local;
+    case 3: return CXX11_clang_opencl_local;
+    case 4: return C2x_clang_opencl_local;
+  }
+  }
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::OpenCLLocalAddressSpace; }
@@ -11030,6 +11248,15 @@ public:
 
 class OpenCLPrivateAddressSpaceAttr : public TypeAttr {
 public:
+  enum Spelling {
+    Keyword_private = 0,
+    GNU_opencl_private = 2,
+    CXX11_clang_opencl_private = 3,
+    C2x_clang_opencl_private = 4,
+  SpellingNotCalculated = 15
+
+  };
+
   static OpenCLPrivateAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLPrivateAddressSpaceAttr(Ctx, CommonInfo);
     A->setImplicit(true);
@@ -11040,17 +11267,15 @@ public:
 
   static OpenCLPrivateAddressSpaceAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
     auto *A = new (Ctx) OpenCLPrivateAddressSpaceAttr(Ctx, CommonInfo);
-    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
-      A->setAttributeSpellingListIndex(0);
     return A;
   }
 
-  static OpenCLPrivateAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLPrivateAddressSpaceAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLPrivateAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return CreateImplicit(Ctx, I);
   }
-  static OpenCLPrivateAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
-    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  static OpenCLPrivateAddressSpaceAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax, OpenCLPrivateAddressSpaceAttr::Spelling S = static_cast<Spelling>(SpellingNotCalculated)) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
     return Create(Ctx, I);
   }
   OpenCLPrivateAddressSpaceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
@@ -11063,6 +11288,16 @@ public:
   void printPretty(raw_ostream &OS,
                    const PrintingPolicy &Policy) const;
   const char *getSpelling() const;
+  Spelling getSemanticSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+    default: llvm_unreachable("Unknown spelling list index");
+    case 0: return Keyword_private;
+    case 1: return Keyword_private;
+    case 2: return GNU_opencl_private;
+    case 3: return CXX11_clang_opencl_private;
+    case 4: return C2x_clang_opencl_private;
+  }
+  }
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::OpenCLPrivateAddressSpace; }
@@ -11630,6 +11865,73 @@ public:
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::PassObjectSize; }
+};
+
+class PatchableFunctionEntryAttr : public InheritableAttr {
+unsigned count;
+
+int offset;
+
+public:
+  static PatchableFunctionEntryAttr *CreateImplicit(ASTContext &Ctx, unsigned Count, int Offset, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) PatchableFunctionEntryAttr(Ctx, CommonInfo, Count, Offset);
+    A->setImplicit(true);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static PatchableFunctionEntryAttr *Create(ASTContext &Ctx, unsigned Count, int Offset, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) PatchableFunctionEntryAttr(Ctx, CommonInfo, Count, Offset);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static PatchableFunctionEntryAttr *CreateImplicit(ASTContext &Ctx, unsigned Count, int Offset, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return CreateImplicit(Ctx, Count, Offset, I);
+  }
+  static PatchableFunctionEntryAttr *Create(ASTContext &Ctx, unsigned Count, int Offset, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return Create(Ctx, Count, Offset, I);
+  }
+  PatchableFunctionEntryAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , unsigned Count
+              , int Offset
+             )
+    : InheritableAttr(Ctx, CommonInfo, attr::PatchableFunctionEntry, false, false)
+              , count(Count)
+              , offset(Offset)
+  {
+  }
+
+  PatchableFunctionEntryAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , unsigned Count
+             )
+    : InheritableAttr(Ctx, CommonInfo, attr::PatchableFunctionEntry, false, false)
+              , count(Count)
+              , offset()
+  {
+  }
+
+  PatchableFunctionEntryAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  unsigned getCount() const {
+    return count;
+  }
+
+  int getOffset() const {
+    return offset;
+  }
+
+  static const int DefaultOffset = 0;
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::PatchableFunctionEntry; }
 };
 
 class PcsAttr : public InheritableAttr {
@@ -12603,6 +12905,66 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::ReleaseCapability; }
 };
 
+class ReleaseHandleAttr : public InheritableParamAttr {
+unsigned handleTypeLength;
+char *handleType;
+
+public:
+  static ReleaseHandleAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef HandleType, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) ReleaseHandleAttr(Ctx, CommonInfo, HandleType);
+    A->setImplicit(true);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static ReleaseHandleAttr *Create(ASTContext &Ctx, llvm::StringRef HandleType, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) ReleaseHandleAttr(Ctx, CommonInfo, HandleType);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static ReleaseHandleAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef HandleType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return CreateImplicit(Ctx, HandleType, I);
+  }
+  static ReleaseHandleAttr *Create(ASTContext &Ctx, llvm::StringRef HandleType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return Create(Ctx, HandleType, I);
+  }
+  ReleaseHandleAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef HandleType
+             )
+    : InheritableParamAttr(Ctx, CommonInfo, attr::ReleaseHandle, false, false)
+              , handleTypeLength(HandleType.size()),handleType(new (Ctx, 1) char[handleTypeLength])
+  {
+      if (!HandleType.empty())
+        std::memcpy(handleType, HandleType.data(), handleTypeLength);
+  }
+
+  ReleaseHandleAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  llvm::StringRef getHandleType() const {
+    return llvm::StringRef(handleType, handleTypeLength);
+  }
+  unsigned getHandleTypeLength() const {
+    return handleTypeLength;
+  }
+  void setHandleType(ASTContext &C, llvm::StringRef S) {
+    handleTypeLength = S.size();
+    this->handleType = new (C, 1) char [handleTypeLength];
+    if (!S.empty())
+      std::memcpy(this->handleType, S.data(), handleTypeLength);
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::ReleaseHandle; }
+};
+
 class RenderScriptKernelAttr : public Attr {
 public:
   static RenderScriptKernelAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
@@ -13043,6 +13405,46 @@ public:
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::SPtr; }
+};
+
+class SYCLKernelAttr : public InheritableAttr {
+public:
+  static SYCLKernelAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) SYCLKernelAttr(Ctx, CommonInfo);
+    A->setImplicit(true);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static SYCLKernelAttr *Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) SYCLKernelAttr(Ctx, CommonInfo);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static SYCLKernelAttr *CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return CreateImplicit(Ctx, I);
+  }
+  static SYCLKernelAttr *Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return Create(Ctx, I);
+  }
+  SYCLKernelAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+    : InheritableAttr(Ctx, CommonInfo, attr::SYCLKernel, false, false)
+  {
+  }
+
+  SYCLKernelAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::SYCLKernel; }
 };
 
 class ScopedLockableAttr : public InheritableAttr {
@@ -13877,16 +14279,6 @@ public:
   }
 
 
-    struct ParsedTargetAttr {
-      std::vector<std::string> Features;
-      StringRef Architecture;
-      StringRef BranchProtection;
-      bool DuplicateArchitecture = false;
-      bool operator ==(const ParsedTargetAttr &Other) const {
-        return DuplicateArchitecture == Other.DuplicateArchitecture &&
-               Architecture == Other.Architecture && Features == Other.Features;
-      }
-    };
     ParsedTargetAttr parse() const {
       return parse(getFeaturesStr());
     }
@@ -14824,6 +15216,66 @@ public:
   static bool classof(const Attr *A) { return A->getKind() == attr::Unused; }
 };
 
+class UseHandleAttr : public InheritableParamAttr {
+unsigned handleTypeLength;
+char *handleType;
+
+public:
+  static UseHandleAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef HandleType, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) UseHandleAttr(Ctx, CommonInfo, HandleType);
+    A->setImplicit(true);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static UseHandleAttr *Create(ASTContext &Ctx, llvm::StringRef HandleType, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) UseHandleAttr(Ctx, CommonInfo, HandleType);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static UseHandleAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef HandleType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return CreateImplicit(Ctx, HandleType, I);
+  }
+  static UseHandleAttr *Create(ASTContext &Ctx, llvm::StringRef HandleType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return Create(Ctx, HandleType, I);
+  }
+  UseHandleAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef HandleType
+             )
+    : InheritableParamAttr(Ctx, CommonInfo, attr::UseHandle, false, false)
+              , handleTypeLength(HandleType.size()),handleType(new (Ctx, 1) char[handleTypeLength])
+  {
+      if (!HandleType.empty())
+        std::memcpy(handleType, HandleType.data(), handleTypeLength);
+  }
+
+  UseHandleAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  llvm::StringRef getHandleType() const {
+    return llvm::StringRef(handleType, handleTypeLength);
+  }
+  unsigned getHandleTypeLength() const {
+    return handleTypeLength;
+  }
+  void setHandleType(ASTContext &C, llvm::StringRef S) {
+    handleTypeLength = S.size();
+    this->handleType = new (C, 1) char [handleTypeLength];
+    if (!S.empty())
+      std::memcpy(this->handleType, S.data(), handleTypeLength);
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::UseHandle; }
+};
+
 class UsedAttr : public InheritableAttr {
 public:
   static UsedAttr *CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
@@ -15407,6 +15859,66 @@ public:
 
 
   static bool classof(const Attr *A) { return A->getKind() == attr::WeakRef; }
+};
+
+class WebAssemblyExportNameAttr : public InheritableAttr {
+unsigned exportNameLength;
+char *exportName;
+
+public:
+  static WebAssemblyExportNameAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef ExportName, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) WebAssemblyExportNameAttr(Ctx, CommonInfo, ExportName);
+    A->setImplicit(true);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static WebAssemblyExportNameAttr *Create(ASTContext &Ctx, llvm::StringRef ExportName, const AttributeCommonInfo &CommonInfo = {SourceRange{}}) {
+    auto *A = new (Ctx) WebAssemblyExportNameAttr(Ctx, CommonInfo, ExportName);
+    if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+      A->setAttributeSpellingListIndex(0);
+    return A;
+  }
+
+  static WebAssemblyExportNameAttr *CreateImplicit(ASTContext &Ctx, llvm::StringRef ExportName, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return CreateImplicit(Ctx, ExportName, I);
+  }
+  static WebAssemblyExportNameAttr *Create(ASTContext &Ctx, llvm::StringRef ExportName, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+    AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+    return Create(Ctx, ExportName, I);
+  }
+  WebAssemblyExportNameAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef ExportName
+             )
+    : InheritableAttr(Ctx, CommonInfo, attr::WebAssemblyExportName, false, false)
+              , exportNameLength(ExportName.size()),exportName(new (Ctx, 1) char[exportNameLength])
+  {
+      if (!ExportName.empty())
+        std::memcpy(exportName, ExportName.data(), exportNameLength);
+  }
+
+  WebAssemblyExportNameAttr *clone(ASTContext &C) const;
+  void printPretty(raw_ostream &OS,
+                   const PrintingPolicy &Policy) const;
+  const char *getSpelling() const;
+  llvm::StringRef getExportName() const {
+    return llvm::StringRef(exportName, exportNameLength);
+  }
+  unsigned getExportNameLength() const {
+    return exportNameLength;
+  }
+  void setExportName(ASTContext &C, llvm::StringRef S) {
+    exportNameLength = S.size();
+    this->exportName = new (C, 1) char [exportNameLength];
+    if (!S.empty())
+      std::memcpy(this->exportName, S.data(), exportNameLength);
+  }
+
+
+
+  static bool classof(const Attr *A) { return A->getKind() == attr::WebAssemblyExportName; }
 };
 
 class WebAssemblyImportModuleAttr : public InheritableAttr {
