@@ -173,6 +173,12 @@ OMPCANCELLATIONPOINTDIRECTIVE(OMPCancellationPointDirective, OMPExecutableDirect
 OMPCRITICALDIRECTIVE(OMPCriticalDirective, OMPExecutableDirective)
 #undef OMPCRITICALDIRECTIVE
 
+#ifndef OMPDEPOBJDIRECTIVE
+#  define OMPDEPOBJDIRECTIVE(Type, Base) OMPEXECUTABLEDIRECTIVE(Type, Base)
+#endif
+OMPDEPOBJDIRECTIVE(OMPDepobjDirective, OMPExecutableDirective)
+#undef OMPDEPOBJDIRECTIVE
+
 #ifndef OMPFLUSHDIRECTIVE
 #  define OMPFLUSHDIRECTIVE(Type, Base) OMPEXECUTABLEDIRECTIVE(Type, Base)
 #endif
@@ -366,6 +372,12 @@ OMPPARALLELMASTERDIRECTIVE(OMPParallelMasterDirective, OMPExecutableDirective)
 #endif
 OMPPARALLELSECTIONSDIRECTIVE(OMPParallelSectionsDirective, OMPExecutableDirective)
 #undef OMPPARALLELSECTIONSDIRECTIVE
+
+#ifndef OMPSCANDIRECTIVE
+#  define OMPSCANDIRECTIVE(Type, Base) OMPEXECUTABLEDIRECTIVE(Type, Base)
+#endif
+OMPSCANDIRECTIVE(OMPScanDirective, OMPExecutableDirective)
+#undef OMPSCANDIRECTIVE
 
 #ifndef OMPSECTIONDIRECTIVE
 #  define OMPSECTIONDIRECTIVE(Type, Base) OMPEXECUTABLEDIRECTIVE(Type, Base)
@@ -857,6 +869,12 @@ CXXFUNCTIONALCASTEXPR(CXXFunctionalCastExpr, ExplicitCastExpr)
 #  define CXXNAMEDCASTEXPR(Type, Base) EXPLICITCASTEXPR(Type, Base)
 #endif
 ABSTRACT_STMT(CXXNAMEDCASTEXPR(CXXNamedCastExpr, ExplicitCastExpr))
+#ifndef CXXADDRSPACECASTEXPR
+#  define CXXADDRSPACECASTEXPR(Type, Base) CXXNAMEDCASTEXPR(Type, Base)
+#endif
+CXXADDRSPACECASTEXPR(CXXAddrspaceCastExpr, CXXNamedCastExpr)
+#undef CXXADDRSPACECASTEXPR
+
 #ifndef CXXCONSTCASTEXPR
 #  define CXXCONSTCASTEXPR(Type, Base) CXXNAMEDCASTEXPR(Type, Base)
 #endif
@@ -881,7 +899,7 @@ CXXREINTERPRETCASTEXPR(CXXReinterpretCastExpr, CXXNamedCastExpr)
 CXXSTATICCASTEXPR(CXXStaticCastExpr, CXXNamedCastExpr)
 #undef CXXSTATICCASTEXPR
 
-STMT_RANGE(CXXNamedCastExpr, CXXConstCastExpr, CXXStaticCastExpr)
+STMT_RANGE(CXXNamedCastExpr, CXXAddrspaceCastExpr, CXXStaticCastExpr)
 
 #undef CXXNAMEDCASTEXPR
 
@@ -1095,6 +1113,12 @@ MSPROPERTYSUBSCRIPTEXPR(MSPropertySubscriptExpr, Expr)
 MATERIALIZETEMPORARYEXPR(MaterializeTemporaryExpr, Expr)
 #undef MATERIALIZETEMPORARYEXPR
 
+#ifndef MATRIXSUBSCRIPTEXPR
+#  define MATRIXSUBSCRIPTEXPR(Type, Base) EXPR(Type, Base)
+#endif
+MATRIXSUBSCRIPTEXPR(MatrixSubscriptExpr, Expr)
+#undef MATRIXSUBSCRIPTEXPR
+
 #ifndef MEMBEREXPR
 #  define MEMBEREXPR(Type, Base) EXPR(Type, Base)
 #endif
@@ -1112,6 +1136,18 @@ NOINITEXPR(NoInitExpr, Expr)
 #endif
 OMPARRAYSECTIONEXPR(OMPArraySectionExpr, Expr)
 #undef OMPARRAYSECTIONEXPR
+
+#ifndef OMPARRAYSHAPINGEXPR
+#  define OMPARRAYSHAPINGEXPR(Type, Base) EXPR(Type, Base)
+#endif
+OMPARRAYSHAPINGEXPR(OMPArrayShapingExpr, Expr)
+#undef OMPARRAYSHAPINGEXPR
+
+#ifndef OMPITERATOREXPR
+#  define OMPITERATOREXPR(Type, Base) EXPR(Type, Base)
+#endif
+OMPITERATOREXPR(OMPIteratorExpr, Expr)
+#undef OMPITERATOREXPR
 
 #ifndef OBJCARRAYLITERAL
 #  define OBJCARRAYLITERAL(Type, Base) EXPR(Type, Base)
@@ -1264,6 +1300,12 @@ PREDEFINEDEXPR(PredefinedExpr, Expr)
 #endif
 PSEUDOOBJECTEXPR(PseudoObjectExpr, Expr)
 #undef PSEUDOOBJECTEXPR
+
+#ifndef RECOVERYEXPR
+#  define RECOVERYEXPR(Type, Base) EXPR(Type, Base)
+#endif
+RECOVERYEXPR(RecoveryExpr, Expr)
+#undef RECOVERYEXPR
 
 #ifndef REQUIRESEXPR
 #  define REQUIRESEXPR(Type, Base) EXPR(Type, Base)

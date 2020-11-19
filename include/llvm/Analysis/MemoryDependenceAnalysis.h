@@ -19,7 +19,6 @@
 #include "llvm/ADT/PointerIntPair.h"
 #include "llvm/ADT/PointerSumType.h"
 #include "llvm/ADT/SmallPtrSet.h"
-#include "llvm/Analysis/AliasAnalysis.h"
 #include "llvm/Analysis/MemoryLocation.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Metadata.h"
@@ -35,6 +34,7 @@
 
 namespace llvm {
 
+class AAResults;
 class AssumptionCache;
 class DominatorTree;
 class Function;
@@ -355,7 +355,7 @@ private:
   ReverseDepMapType ReverseNonLocalDeps;
 
   /// Current AA implementation, just a cache.
-  AliasAnalysis &AA;
+  AAResults &AA;
   AssumptionCache &AC;
   const TargetLibraryInfo &TLI;
   DominatorTree &DT;
@@ -365,7 +365,7 @@ private:
   unsigned DefaultBlockScanLimit;
 
 public:
-  MemoryDependenceResults(AliasAnalysis &AA, AssumptionCache &AC,
+  MemoryDependenceResults(AAResults &AA, AssumptionCache &AC,
                           const TargetLibraryInfo &TLI, DominatorTree &DT,
                           PhiValues &PV, unsigned DefaultBlockScanLimit)
       : AA(AA), AC(AC), TLI(TLI), DT(DT), PV(PV),
@@ -384,8 +384,7 @@ public:
   ///
   /// See the class comment for more details. It is illegal to call this on
   /// non-memory instructions.
-  MemDepResult getDependency(Instruction *QueryInst,
-                             OrderedBasicBlock *OBB = nullptr);
+  MemDepResult getDependency(Instruction *QueryInst);
 
   /// Perform a full dependency query for the specified call, returning the set
   /// of blocks that the value is potentially live across.
@@ -451,14 +450,12 @@ public:
                                         BasicBlock::iterator ScanIt,
                                         BasicBlock *BB,
                                         Instruction *QueryInst = nullptr,
-                                        unsigned *Limit = nullptr,
-                                        OrderedBasicBlock *OBB = nullptr);
+                                        unsigned *Limit = nullptr);
 
   MemDepResult
   getSimplePointerDependencyFrom(const MemoryLocation &MemLoc, bool isLoad,
                                  BasicBlock::iterator ScanIt, BasicBlock *BB,
-                                 Instruction *QueryInst, unsigned *Limit,
-                                 OrderedBasicBlock *OBB);
+                                 Instruction *QueryInst, unsigned *Limit);
 
   /// This analysis looks for other loads and stores with invariant.group
   /// metadata and the same pointer operand. Returns Unknown if it does not
@@ -481,7 +478,8 @@ private:
                                    BasicBlock *BB,
                                    SmallVectorImpl<NonLocalDepResult> &Result,
                                    DenseMap<BasicBlock *, Value *> &Visited,
-                                   bool SkipFirstBlock = false);
+                                   bool SkipFirstBlock = false,
+                                   bool IsIncomplete = false);
   MemDepResult GetNonLocalInfoForBlock(Instruction *QueryInst,
                                        const MemoryLocation &Loc, bool isLoad,
                                        BasicBlock *BB, NonLocalDepInfo *Cache,

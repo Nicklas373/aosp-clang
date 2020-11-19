@@ -90,8 +90,8 @@
     OS << " " << SA->getTypeTagIdx().getSourceIndex();
     if (SA->getIsPointer()) OS << " IsPointer";
   }
-  void VisitArmMveAliasAttr(const ArmMveAliasAttr *A) {
-    const auto *SA = cast<ArmMveAliasAttr>(A); (void)SA;
+  void VisitArmBuiltinAliasAttr(const ArmBuiltinAliasAttr *A) {
+    const auto *SA = cast<ArmBuiltinAliasAttr>(A); (void)SA;
     if (SA->getBuiltinName())
       OS << " " << SA->getBuiltinName()->getName();
   }
@@ -419,6 +419,9 @@
   void VisitOMPAllocateDeclAttr(const OMPAllocateDeclAttr *A) {
     const auto *SA = cast<OMPAllocateDeclAttr>(A); (void)SA;
     switch(SA->getAllocatorType()) {
+    case OMPAllocateDeclAttr::OMPNullMemAlloc:
+      OS << " OMPNullMemAlloc";
+      break;
     case OMPAllocateDeclAttr::OMPDefaultMemAlloc:
       OS << " OMPDefaultMemAlloc";
       break;
@@ -450,7 +453,7 @@
   }
   void VisitOMPCaptureKindAttr(const OMPCaptureKindAttr *A) {
     const auto *SA = cast<OMPCaptureKindAttr>(A); (void)SA;
-    OS << " " << SA->getCaptureKind();
+    OS << " " << SA->getCaptureKindVal();
   }
   void VisitOMPDeclareSimdDeclAttr(const OMPDeclareSimdDeclAttr *A) {
     const auto *SA = cast<OMPDeclareSimdDeclAttr>(A); (void)SA;
@@ -492,14 +495,7 @@
   }
   void VisitOMPDeclareVariantAttr(const OMPDeclareVariantAttr *A) {
     const auto *SA = cast<OMPDeclareVariantAttr>(A); (void)SA;
-    for (const auto &Val : SA->ctxSelectorSets())
-      OS << " " << Val;
-    for (const auto &Val : SA->ctxSelectors())
-      OS << " " << Val;
-    for (const auto &Val : SA->implVendors())
-      OS << " " << Val;
-    for (const auto &Val : SA->deviceKinds())
-      OS << " " << Val;
+    OS << " " << SA->getTraitInfos();
   }
   void VisitObjCBridgeAttr(const ObjCBridgeAttr *A) {
     const auto *SA = cast<ObjCBridgeAttr>(A); (void)SA;
@@ -811,6 +807,8 @@
   void VisitUuidAttr(const UuidAttr *A) {
     const auto *SA = cast<UuidAttr>(A); (void)SA;
     OS << " \"" << SA->getGuid() << "\"";
+    OS << " ";
+    dumpBareDeclRef(SA->getGuidDecl());
   }
   void VisitVecTypeHintAttr(const VecTypeHintAttr *A) {
     const auto *SA = cast<VecTypeHintAttr>(A); (void)SA;

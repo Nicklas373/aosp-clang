@@ -1295,6 +1295,7 @@ public:
   Init *resolveReferences(Resolver &R) const override;
   Init *Fold(Record *CurRec) const;
 
+  bool isConcrete() const override;
   std::string getAsString() const override {
     return Rec->getAsString() + "." + FieldName->getValue().str();
   }
@@ -1602,11 +1603,6 @@ public:
   /// The resolver should not resolve any of the fields itself, to avoid
   /// recursion / infinite loops.
   void resolveReferences(Resolver &R, const RecordVal *SkipVal = nullptr);
-
-  /// If anything in this record refers to RV, replace the
-  /// reference to RV with the RHS of RV.  If RV is null, we resolve all
-  /// possible references.
-  void resolveReferencesTo(const RecordVal *RV);
 
   RecordKeeper &getRecords() const {
     return TrackedRecords;

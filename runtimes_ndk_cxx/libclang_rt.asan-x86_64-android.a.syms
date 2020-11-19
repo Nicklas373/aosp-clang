@@ -27,6 +27,7 @@
   __interceptor_bsd_signal;
   __interceptor_calloc;
   __interceptor_cfree;
+  __interceptor_clock_getcpuclockid;
   __interceptor_clock_getres;
   __interceptor_clock_gettime;
   __interceptor_clock_settime;
@@ -69,6 +70,9 @@
   __interceptor_getmntent;
   __interceptor_getnameinfo;
   __interceptor_getpeername;
+  __interceptor_getprotobyname;
+  __interceptor_getprotobynumber;
+  __interceptor_getprotoent;
   __interceptor_getpwnam;
   __interceptor_getpwuid;
   __interceptor_getresgid;
@@ -156,7 +160,6 @@
   __interceptor_puts;
   __interceptor_pvalloc;
   __interceptor_pwrite;
-  __interceptor_qsort;
   __interceptor_read;
   __interceptor_readdir;
   __interceptor_readdir_r;
@@ -248,6 +251,7 @@
   __interceptor_tmpnam;
   __interceptor_ttyname;
   __interceptor_ttyname_r;
+  __interceptor_uname;
   __interceptor_valloc;
   __interceptor_vasprintf;
   __interceptor_vfork;
@@ -280,6 +284,7 @@
   __sanitizer_annotate_contiguous_container;
   __sanitizer_contiguous_container_find_bad_address;
   __sanitizer_cov_8bit_counters_init;
+  __sanitizer_cov_bool_flag_init;
   __sanitizer_cov_dump;
   __sanitizer_cov_pcs_init;
   __sanitizer_cov_reset;
@@ -975,6 +980,7 @@
   bsd_signal;
   calloc;
   cfree;
+  clock_getcpuclockid;
   clock_getres;
   clock_gettime;
   clock_settime;
@@ -1017,6 +1023,9 @@
   getmntent;
   getnameinfo;
   getpeername;
+  getprotobyname;
+  getprotobynumber;
+  getprotoent;
   getpwnam;
   getpwuid;
   getresgid;
@@ -1103,7 +1112,6 @@
   puts;
   pvalloc;
   pwrite;
-  qsort;
   read;
   readdir;
   readdir_r;
@@ -1194,6 +1202,7 @@
   tmpnam;
   ttyname;
   ttyname_r;
+  uname;
   valloc;
   vasprintf;
   vfork;

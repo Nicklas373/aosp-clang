@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef liblldb_ValueObjectRegister_h_
-#define liblldb_ValueObjectRegister_h_
+#ifndef LLDB_CORE_VALUEOBJECTREGISTER_H
+#define LLDB_CORE_VALUEOBJECTREGISTER_H
 
 #include "lldb/Core/ValueObject.h"
 #include "lldb/Symbol/CompilerType.h"
@@ -69,10 +69,13 @@ private:
   friend class ValueObjectRegisterContext;
 
   ValueObjectRegisterSet(ExecutionContextScope *exe_scope,
+                         ValueObjectManager &manager,
                          lldb::RegisterContextSP &reg_ctx_sp, uint32_t set_idx);
 
   // For ValueObject only
-  DISALLOW_COPY_AND_ASSIGN(ValueObjectRegisterSet);
+  ValueObjectRegisterSet(const ValueObjectRegisterSet &) = delete;
+  const ValueObjectRegisterSet &
+  operator=(const ValueObjectRegisterSet &) = delete;
 };
 
 class ValueObjectRegister : public ValueObject {
@@ -123,12 +126,14 @@ private:
   ValueObjectRegister(ValueObject &parent, lldb::RegisterContextSP &reg_ctx_sp,
                       uint32_t reg_num);
   ValueObjectRegister(ExecutionContextScope *exe_scope,
+                      ValueObjectManager &manager,
                       lldb::RegisterContextSP &reg_ctx_sp, uint32_t reg_num);
 
   // For ValueObject only
-  DISALLOW_COPY_AND_ASSIGN(ValueObjectRegister);
+  ValueObjectRegister(const ValueObjectRegister &) = delete;
+  const ValueObjectRegister &operator=(const ValueObjectRegister &) = delete;
 };
 
 } // namespace lldb_private
 
-#endif // liblldb_ValueObjectRegister_h_
+#endif // LLDB_CORE_VALUEOBJECTREGISTER_H

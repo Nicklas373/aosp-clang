@@ -46,20 +46,33 @@ public:
   getCallThroughTrampoline(JITDylib &SourceJD, SymbolStringPtr SymbolName,
                            NotifyResolvedFunction NotifyResolved);
 
+  void resolveTrampolineLandingAddress(
+      JITTargetAddress TrampolineAddr,
+      TrampolinePool::NotifyLandingResolvedFunction NotifyLandingResolved);
+
 protected:
+  using NotifyLandingResolvedFunction =
+      TrampolinePool::NotifyLandingResolvedFunction;
+
   LazyCallThroughManager(ExecutionSession &ES,
                          JITTargetAddress ErrorHandlerAddr,
                          std::unique_ptr<TrampolinePool> TP);
 
-  JITTargetAddress callThroughToSymbol(JITTargetAddress TrampolineAddr);
+  struct ReexportsEntry {
+    JITDylib *SourceJD;
+    SymbolStringPtr SymbolName;
+  };
 
+  JITTargetAddress reportCallThroughError(Error Err);
+  Expected<ReexportsEntry> findReexport(JITTargetAddress TrampolineAddr);
+  Error notifyResolved(JITTargetAddress TrampolineAddr,
+                       JITTargetAddress ResolvedAddr);
   void setTrampolinePool(std::unique_ptr<TrampolinePool> TP) {
     this->TP = std::move(TP);
   }
 
 private:
-  using ReexportsMap =
-      std::map<JITTargetAddress, std::pair<JITDylib *, SymbolStringPtr>>;
+  using ReexportsMap = std::map<JITTargetAddress, ReexportsEntry>;
 
   using NotifiersMap = std::map<JITTargetAddress, NotifyResolvedFunction>;
 
@@ -74,14 +87,19 @@ private:
 /// A lazy call-through manager that builds trampolines in the current process.
 class LocalLazyCallThroughManager : public LazyCallThroughManager {
 private:
+  using NotifyTargetResolved = unique_function<void(JITTargetAddress)>;
+
   LocalLazyCallThroughManager(ExecutionSession &ES,
                               JITTargetAddress ErrorHandlerAddr)
       : LazyCallThroughManager(ES, ErrorHandlerAddr, nullptr) {}
 
   template <typename ORCABI> Error init() {
     auto TP = LocalTrampolinePool<ORCABI>::Create(
-        [this](JITTargetAddress TrampolineAddr) {
-          return callThroughToSymbol(TrampolineAddr);
+        [this](JITTargetAddress TrampolineAddr,
+               TrampolinePool::NotifyLandingResolvedFunction
+                   NotifyLandingResolved) {
+          resolveTrampolineLandingAddress(TrampolineAddr,
+                                          std::move(NotifyLandingResolved));
         });
 
     if (!TP)

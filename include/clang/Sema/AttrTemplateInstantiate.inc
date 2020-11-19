@@ -161,8 +161,8 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<ArgumentWithTypeTagAttr>(At);
       return A->clone(C);
     }
-    case attr::ArmMveAlias: {
-      const auto *A = cast<ArmMveAliasAttr>(At);
+    case attr::ArmBuiltinAlias: {
+      const auto *A = cast<ArmBuiltinAliasAttr>(At);
       return A->clone(C);
     }
     case attr::ArmMveStrictPolymorphism: {
@@ -290,6 +290,14 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<CUDADeviceAttr>(At);
       return A->clone(C);
     }
+    case attr::CUDADeviceBuiltinSurfaceType: {
+      const auto *A = cast<CUDADeviceBuiltinSurfaceTypeAttr>(At);
+      return A->clone(C);
+    }
+    case attr::CUDADeviceBuiltinTextureType: {
+      const auto *A = cast<CUDADeviceBuiltinTextureTypeAttr>(At);
+      return A->clone(C);
+    }
     case attr::CUDAGlobal: {
       const auto *A = cast<CUDAGlobalAttr>(At);
       return A->clone(C);
@@ -336,6 +344,14 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::Cleanup: {
       const auto *A = cast<CleanupAttr>(At);
+      return A->clone(C);
+    }
+    case attr::CmseNSCall: {
+      const auto *A = cast<CmseNSCallAttr>(At);
+      return A->clone(C);
+    }
+    case attr::CmseNSEntry: {
+      const auto *A = cast<CmseNSEntryAttr>(At);
       return A->clone(C);
     }
     case attr::CodeSeg: {
@@ -509,10 +525,6 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<GuardedVarAttr>(At);
       return A->clone(C);
     }
-    case attr::HIPPinnedShadow: {
-      const auto *A = cast<HIPPinnedShadowAttr>(At);
-      return A->clone(C);
-    }
     case attr::Hot: {
       const auto *A = cast<HotAttr>(At);
       return A->clone(C);
@@ -559,6 +571,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::LifetimeBound: {
       const auto *A = cast<LifetimeBoundAttr>(At);
+      return A->clone(C);
+    }
+    case attr::LoaderUninitialized: {
+      const auto *A = cast<LoaderUninitializedAttr>(At);
       return A->clone(C);
     }
     case attr::LockReturned: {
@@ -724,6 +740,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::NoInstrumentFunction: {
       const auto *A = cast<NoInstrumentFunctionAttr>(At);
+      return A->clone(C);
+    }
+    case attr::NoMerge: {
+      const auto *A = cast<NoMergeAttr>(At);
       return A->clone(C);
     }
     case attr::NoMicroMips: {
@@ -1483,7 +1503,7 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::ArgumentWithTypeTag: {
       return nullptr;
     }
-    case attr::ArmMveAlias: {
+    case attr::ArmBuiltinAlias: {
       return nullptr;
     }
     case attr::ArmMveStrictPolymorphism: {
@@ -1555,6 +1575,12 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::CUDADevice: {
       return nullptr;
     }
+    case attr::CUDADeviceBuiltinSurfaceType: {
+      return nullptr;
+    }
+    case attr::CUDADeviceBuiltinTextureType: {
+      return nullptr;
+    }
     case attr::CUDAGlobal: {
       return nullptr;
     }
@@ -1589,6 +1615,12 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::Cleanup: {
+      return nullptr;
+    }
+    case attr::CmseNSCall: {
+      return nullptr;
+    }
+    case attr::CmseNSEntry: {
       return nullptr;
     }
     case attr::CodeSeg: {
@@ -1695,9 +1727,6 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::GuardedVar: {
       return nullptr;
     }
-    case attr::HIPPinnedShadow: {
-      return nullptr;
-    }
     case attr::Hot: {
       return nullptr;
     }
@@ -1732,6 +1761,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::LifetimeBound: {
+      return nullptr;
+    }
+    case attr::LoaderUninitialized: {
       return nullptr;
     }
     case attr::LockReturned: {
@@ -1843,6 +1875,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::NoInstrumentFunction: {
+      return nullptr;
+    }
+    case attr::NoMerge: {
       return nullptr;
     }
     case attr::NoMicroMips: {

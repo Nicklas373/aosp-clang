@@ -325,6 +325,25 @@ set_target_properties(clangFormat PROPERTIES
 list(APPEND _IMPORT_CHECK_TARGETS clangFormat )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangFormat "${_IMPORT_PREFIX}/lib64/libclangFormat.a" )
 
+# Import target "clangTesting" for configuration "Release"
+set_property(TARGET clangTesting APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangTesting PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangTesting.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangTesting )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangTesting "${_IMPORT_PREFIX}/lib64/libclangTesting.a" )
+
+# Import target "diagtool" for configuration "Release"
+set_property(TARGET diagtool APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(diagtool PROPERTIES
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/bin/diagtool"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS diagtool )
+list(APPEND _IMPORT_CHECK_FILES_FOR_diagtool "${_IMPORT_PREFIX}/bin/diagtool" )
+
 # Import target "clang" for configuration "Release"
 set_property(TARGET clang APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clang PROPERTIES
@@ -362,15 +381,6 @@ set_target_properties(clangHandleLLVM PROPERTIES
 
 list(APPEND _IMPORT_CHECK_TARGETS clangHandleLLVM )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangHandleLLVM "${_IMPORT_PREFIX}/lib64/libclangHandleLLVM.a" )
-
-# Import target "clang-import-test" for configuration "Release"
-set_property(TARGET clang-import-test APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-set_target_properties(clang-import-test PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/bin/clang-import-test"
-  )
-
-list(APPEND _IMPORT_CHECK_TARGETS clang-import-test )
-list(APPEND _IMPORT_CHECK_FILES_FOR_clang-import-test "${_IMPORT_PREFIX}/bin/clang-import-test" )
 
 # Import target "clang-offload-bundler" for configuration "Release"
 set_property(TARGET clang-offload-bundler APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -621,6 +631,16 @@ set_target_properties(clangTidyLLVMModule PROPERTIES
 
 list(APPEND _IMPORT_CHECK_TARGETS clangTidyLLVMModule )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangTidyLLVMModule "${_IMPORT_PREFIX}/lib64/libclangTidyLLVMModule.a" )
+
+# Import target "clangTidyLLVMLibcModule" for configuration "Release"
+set_property(TARGET clangTidyLLVMLibcModule APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangTidyLLVMLibcModule PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangTidyLLVMLibcModule.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangTidyLLVMLibcModule )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangTidyLLVMLibcModule "${_IMPORT_PREFIX}/lib64/libclangTidyLLVMLibcModule.a" )
 
 # Import target "clangTidyMiscModule" for configuration "Release"
 set_property(TARGET clangTidyMiscModule APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -884,6 +904,16 @@ set_target_properties(pp-trace PROPERTIES
 list(APPEND _IMPORT_CHECK_TARGETS pp-trace )
 list(APPEND _IMPORT_CHECK_FILES_FOR_pp-trace "${_IMPORT_PREFIX}/bin/pp-trace" )
 
+# Import target "clangdSupport" for configuration "Release"
+set_property(TARGET clangdSupport APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangdSupport PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangdSupport.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangdSupport )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangdSupport "${_IMPORT_PREFIX}/lib64/libclangdSupport.a" )
+
 # Import target "clangDaemon" for configuration "Release"
 set_property(TARGET clangDaemon APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clangDaemon PROPERTIES
@@ -912,6 +942,16 @@ set_target_properties(clangd PROPERTIES
 
 list(APPEND _IMPORT_CHECK_TARGETS clangd )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangd "${_IMPORT_PREFIX}/bin/clangd" )
+
+# Import target "clangdRemoteIndex" for configuration "Release"
+set_property(TARGET clangdRemoteIndex APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangdRemoteIndex PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangdRemoteIndex.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangdRemoteIndex )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangdRemoteIndex "${_IMPORT_PREFIX}/lib64/libclangdRemoteIndex.a" )
 
 # Import target "libclang" for configuration "Release"
 set_property(TARGET libclang APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)

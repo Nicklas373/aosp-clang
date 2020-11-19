@@ -35,6 +35,9 @@
 /* Default architecture for OpenMP offloading to Nvidia GPUs. */
 #define CLANG_OPENMP_NVPTX_DEFAULT_ARCH "sm_35"
 
+/* Default architecture for SystemZ. */
+#define CLANG_SYSTEMZ_DEFAULT_ARCH "z10"
+
 /* Multilib suffix for libdir. */
 #define CLANG_LIBDIR_SUFFIX "64"
 
@@ -55,13 +58,13 @@
 #define GCC_INSTALL_PREFIX ""
 
 /* Define if we have libxml2 */
-/* #undef CLANG_HAVE_LIBXML */
+#define CLANG_HAVE_LIBXML 1
 
 /* Define if we have sys/resource.h (rlimits) */
 #define CLANG_HAVE_RLIMITS 1
 
 /* The LLVM product name and version */
-#define BACKEND_PACKAGE_STRING "LLVM 11.0.1git"
+#define BACKEND_PACKAGE_STRING "LLVM 11.0.5git"
 
 /* Linker version detected at compile time. */
 /* #undef HOST_LINK_VERSION */

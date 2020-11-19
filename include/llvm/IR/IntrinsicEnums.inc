@@ -13,6 +13,9 @@
     assume,                                    // llvm.assume
     bitreverse,                                // llvm.bitreverse
     bswap,                                     // llvm.bswap
+    call_preallocated_arg,                     // llvm.call.preallocated.arg
+    call_preallocated_setup,                   // llvm.call.preallocated.setup
+    call_preallocated_teardown,                // llvm.call.preallocated.teardown
     canonicalize,                              // llvm.canonicalize
     ceil,                                      // llvm.ceil
     clear_cache,                               // llvm.clear_cache
@@ -70,6 +73,7 @@
     exp,                                       // llvm.exp
     exp2,                                      // llvm.exp2
     expect,                                    // llvm.expect
+    expect_with_probability,                   // llvm.expect.with.probability
     experimental_constrained_ceil,             // llvm.experimental.constrained.ceil
     experimental_constrained_cos,              // llvm.experimental.constrained.cos
     experimental_constrained_exp,              // llvm.experimental.constrained.exp
@@ -104,6 +108,7 @@
     experimental_constrained_powi,             // llvm.experimental.constrained.powi
     experimental_constrained_rint,             // llvm.experimental.constrained.rint
     experimental_constrained_round,            // llvm.experimental.constrained.round
+    experimental_constrained_roundeven,        // llvm.experimental.constrained.roundeven
     experimental_constrained_sin,              // llvm.experimental.constrained.sin
     experimental_constrained_sitofp,           // llvm.experimental.constrained.sitofp
     experimental_constrained_sqrt,             // llvm.experimental.constrained.sqrt
@@ -142,6 +147,7 @@
     gcread,                                    // llvm.gcread
     gcroot,                                    // llvm.gcroot
     gcwrite,                                   // llvm.gcwrite
+    get_active_lane_mask,                      // llvm.get.active.lane.mask
     get_dynamic_area_offset,                   // llvm.get.dynamic.area.offset
     hwasan_check_memaccess,                    // llvm.hwasan.check.memaccess
     hwasan_check_memaccess_shortgranules,      // llvm.hwasan.check.memaccess.shortgranules
@@ -175,8 +181,8 @@
     masked_load,                               // llvm.masked.load
     masked_scatter,                            // llvm.masked.scatter
     masked_store,                              // llvm.masked.store
-    matrix_columnwise_load,                    // llvm.matrix.columnwise.load
-    matrix_columnwise_store,                   // llvm.matrix.columnwise.store
+    matrix_column_major_load,                  // llvm.matrix.column.major.load
+    matrix_column_major_store,                 // llvm.matrix.column.major.store
     matrix_multiply,                           // llvm.matrix.multiply
     matrix_transpose,                          // llvm.matrix.transpose
     maximum,                                   // llvm.maximum
@@ -236,9 +242,11 @@
     returnaddress,                             // llvm.returnaddress
     rint,                                      // llvm.rint
     round,                                     // llvm.round
+    roundeven,                                 // llvm.roundeven
     sadd_sat,                                  // llvm.sadd.sat
     sadd_with_overflow,                        // llvm.sadd.with.overflow
     sdiv_fix,                                  // llvm.sdiv.fix
+    sdiv_fix_sat,                              // llvm.sdiv.fix.sat
     set_loop_iterations,                       // llvm.set.loop.iterations
     sideeffect,                                // llvm.sideeffect
     sin,                                       // llvm.sin
@@ -264,6 +272,7 @@
     uadd_sat,                                  // llvm.uadd.sat
     uadd_with_overflow,                        // llvm.uadd.with.overflow
     udiv_fix,                                  // llvm.udiv.fix
+    udiv_fix_sat,                              // llvm.udiv.fix.sat
     umul_fix,                                  // llvm.umul.fix
     umul_fix_sat,                              // llvm.umul.fix.sat
     umul_with_overflow,                        // llvm.umul.with.overflow
@@ -273,8 +282,21 @@
     vaend,                                     // llvm.va_end
     vastart,                                   // llvm.va_start
     var_annotation,                            // llvm.var.annotation
+    vp_add,                                    // llvm.vp.add
+    vp_and,                                    // llvm.vp.and
+    vp_ashr,                                   // llvm.vp.ashr
+    vp_lshr,                                   // llvm.vp.lshr
+    vp_mul,                                    // llvm.vp.mul
+    vp_or,                                     // llvm.vp.or
+    vp_sdiv,                                   // llvm.vp.sdiv
+    vp_shl,                                    // llvm.vp.shl
+    vp_srem,                                   // llvm.vp.srem
+    vp_sub,                                    // llvm.vp.sub
+    vp_udiv,                                   // llvm.vp.udiv
+    vp_urem,                                   // llvm.vp.urem
+    vp_xor,                                    // llvm.vp.xor
     vscale,                                    // llvm.vscale
     write_register,                            // llvm.write_register
     xray_customevent,                          // llvm.xray.customevent
     xray_typedevent,                           // llvm.xray.typedevent
-    num_intrinsics = 7643
+    num_intrinsics = 8050

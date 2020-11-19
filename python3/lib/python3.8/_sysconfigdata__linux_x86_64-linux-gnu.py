@@ -12,14 +12,16 @@ build_time_vars = {'ABIFLAGS': '',
  'BINDIR': '/tmpfs/src/out/install/bin',
  'BINLIBDEST': '/tmpfs/src/out/install/lib/python3.8',
  'BLDLIBRARY': '-L. -lpython3.8',
- 'BLDSHARED': "gcc -pthread -shared -s -Wl,-rpath,'$ORIGIN/../lib'",
+ 'BLDSHARED': 'cc -Wno-unused-command-line-argument -s '
+              "-Wl,-rpath,'$ORIGIN/../lib' -pthread -shared",
  'BUILDEXE': '',
  'BUILDPYTHON': 'python',
  'BUILD_GNU_TYPE': 'x86_64-pc-linux-gnu',
  'BYTESTR_DEPS': '\\',
- 'CC': 'gcc -pthread',
+ 'CC': "cc -Wno-unused-command-line-argument -s -Wl,-rpath,'$ORIGIN/../lib' "
+       '-pthread',
  'CCSHARED': '-fPIC',
- 'CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall',
+ 'CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g  -O3 -Wall',
  'CFLAGSFORSHARED': '-fPIC',
  'CFLAGS_ALIASING': '',
  'CFLAGS_NODIST': '',
@@ -31,10 +33,11 @@ build_time_vars = {'ABIFLAGS': '',
                             '-Wno-missing-field-initializers '
                             '-Werror=implicit-function-declaration',
  'CONFIGURE_CPPFLAGS': '',
- 'CONFIGURE_LDFLAGS': "-s -Wl,-rpath,'$ORIGIN/../lib'",
+ 'CONFIGURE_LDFLAGS': '',
  'CONFIGURE_LDFLAGS_NODIST': '',
- 'CONFIG_ARGS': "'--prefix=/tmpfs/src/out/install' '--enable-shared' "
-                "'LDFLAGS=-s -Wl,-rpath,'\\''$ORIGIN/../lib'\\'''",
+ 'CONFIG_ARGS': "'--prefix=/tmpfs/src/out/install' '--enable-shared' 'CC=cc "
+                '-Wno-unused-command-line-argument -s '
+                "-Wl,-rpath,'\\''$ORIGIN/../lib'\\'''",
  'CONFINCLUDEDIR': '/tmpfs/src/out/install/include',
  'CONFINCLUDEPY': '/tmpfs/src/out/install/include/python3.8',
  'COREPYTHONPATH': '',
@@ -44,7 +47,8 @@ build_time_vars = {'ABIFLAGS': '',
                             'report"',
  'CPPFLAGS': '-IObjects -IInclude -IPython -I. '
              '-I/tmpfs/src/git/cpython3/Include',
- 'CXX': 'g++ -pthread',
+ 'CXX': "c++ -Wno-unused-command-line-argument -s -Wl,-rpath,'$ORIGIN/../lib' "
+        '-pthread',
  'DESTDIRS': '/tmpfs/src/out/install /tmpfs/src/out/install/lib '
              '/tmpfs/src/out/install/lib/python3.8 '
              '/tmpfs/src/out/install/lib/python3.8/lib-dynload',
@@ -524,12 +528,14 @@ build_time_vars = {'ABIFLAGS': '',
  'INSTSONAME': 'libpython3.8.so.1.0',
  'IO_H': 'Modules/_io/_iomodule.h',
  'IO_OBJS': '\\',
- 'LDCXXSHARED': 'g++ -pthread -shared',
- 'LDFLAGS': "-s -Wl,-rpath,'$ORIGIN/../lib'",
+ 'LDCXXSHARED': 'c++ -Wno-unused-command-line-argument -s '
+                "-Wl,-rpath,'$ORIGIN/../lib' -pthread -shared",
+ 'LDFLAGS': '',
  'LDFLAGS_NODIST': '',
  'LDLIBRARY': 'libpython3.8.so',
  'LDLIBRARYDIR': '',
- 'LDSHARED': "gcc -pthread -shared -s -Wl,-rpath,'$ORIGIN/../lib'",
+ 'LDSHARED': 'cc -Wno-unused-command-line-argument -s '
+             "-Wl,-rpath,'$ORIGIN/../lib' -pthread -shared",
  'LDVERSION': '3.8',
  'LIBC': '',
  'LIBDEST': '/tmpfs/src/out/install/lib/python3.8',
@@ -546,19 +552,21 @@ build_time_vars = {'ABIFLAGS': '',
  'LIBRARY_OBJS_OMIT_FROZEN': '\\',
  'LIBS': '-lcrypt -lpthread -ldl  -lutil -lm',
  'LIBSUBDIRS': 'tkinter tkinter/test tkinter/test/test_tkinter \\',
- 'LINKCC': 'gcc -pthread',
+ 'LINKCC': 'cc -Wno-unused-command-line-argument -s '
+           "-Wl,-rpath,'$ORIGIN/../lib' -pthread",
  'LINKFORSHARED': '-Xlinker -export-dynamic',
  'LIPO_32BIT_FLAGS': '',
  'LLVM_PROF_ERR': 'no',
  'LLVM_PROF_FILE': '',
- 'LLVM_PROF_MERGER': 'true',
+ 'LLVM_PROF_MERGER': '',
  'LN': 'ln',
  'LOCALMODLIBS': '',
  'MACHDEP': 'linux',
  'MACHDEP_OBJS': '',
  'MACHDESTLIB': '/tmpfs/src/out/install/lib/python3.8',
  'MACOSX_DEPLOYMENT_TARGET': '',
- 'MAINCC': 'gcc -pthread',
+ 'MAINCC': 'cc -Wno-unused-command-line-argument -s '
+           "-Wl,-rpath,'$ORIGIN/../lib' -pthread",
  'MAJOR_IN_MKDEV': 0,
  'MAJOR_IN_SYSMACROS': 0,
  'MAKESETUP': '/tmpfs/src/git/cpython3/Modules/makesetup',
@@ -591,7 +599,7 @@ build_time_vars = {'ABIFLAGS': '',
  'OPENSSL_INCLUDES': '',
  'OPENSSL_LDFLAGS': '',
  'OPENSSL_LIBS': '-lssl -lcrypto',
- 'OPT': '-DNDEBUG -g -fwrapv -O3 -Wall',
+ 'OPT': '-DNDEBUG -g  -O3 -Wall',
  'OTHER_LIBTOOL_OPT': '',
  'PACKAGE_BUGREPORT': 0,
  'PACKAGE_NAME': 0,
@@ -601,8 +609,8 @@ build_time_vars = {'ABIFLAGS': '',
  'PACKAGE_VERSION': 0,
  'PARSER_HEADERS': '\\',
  'PARSER_OBJS': '\\ Parser/myreadline.o Parser/parsetok.o Parser/tokenizer.o',
- 'PGO_PROF_GEN_FLAG': '-fprofile-generate',
- 'PGO_PROF_USE_FLAG': '-fprofile-use -fprofile-correction',
+ 'PGO_PROF_GEN_FLAG': '',
+ 'PGO_PROF_USE_FLAG': '',
  'POBJS': '\\',
  'POSIX_SEMAPHORES_NOT_ENABLED': 0,
  'PROFILE_TASK': '-m test --pgo',
@@ -621,38 +629,38 @@ build_time_vars = {'ABIFLAGS': '',
  'PYTHON_FOR_REGEN': 'python3',
  'PYTHON_HEADERS': '\\',
  'PYTHON_OBJS': '\\',
- 'PY_BUILTIN_MODULE_CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g '
-                             '-fwrapv -O3 -Wall -std=c99 -Wextra '
-                             '-Wno-unused-result -Wno-unused-parameter '
+ 'PY_BUILTIN_MODULE_CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g  '
+                             '-O3 -Wall -std=c99 -Wextra -Wno-unused-result '
+                             '-Wno-unused-parameter '
                              '-Wno-missing-field-initializers '
                              '-Werror=implicit-function-declaration  '
                              '-I/tmpfs/src/git/cpython3/Include/internal '
                              '-IObjects -IInclude -IPython -I. '
                              '-I/tmpfs/src/git/cpython3/Include -fPIC '
                              '-DPy_BUILD_CORE_BUILTIN',
- 'PY_CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall',
+ 'PY_CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g  -O3 -Wall',
  'PY_CFLAGS_NODIST': '-std=c99 -Wextra -Wno-unused-result '
                      '-Wno-unused-parameter -Wno-missing-field-initializers '
                      '-Werror=implicit-function-declaration  '
                      '-I/tmpfs/src/git/cpython3/Include/internal',
  'PY_COERCE_C_LOCALE': 1,
- 'PY_CORE_CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O3 '
-                   '-Wall -std=c99 -Wextra -Wno-unused-result '
-                   '-Wno-unused-parameter -Wno-missing-field-initializers '
+ 'PY_CORE_CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g  -O3 -Wall '
+                   '-std=c99 -Wextra -Wno-unused-result -Wno-unused-parameter '
+                   '-Wno-missing-field-initializers '
                    '-Werror=implicit-function-declaration  '
                    '-I/tmpfs/src/git/cpython3/Include/internal -IObjects '
                    '-IInclude -IPython -I. -I/tmpfs/src/git/cpython3/Include '
                    '-fPIC -DPy_BUILD_CORE',
- 'PY_CORE_LDFLAGS': "-s -Wl,-rpath,'$ORIGIN/../lib'",
+ 'PY_CORE_LDFLAGS': '',
  'PY_CPPFLAGS': '-IObjects -IInclude -IPython -I. '
                 '-I/tmpfs/src/git/cpython3/Include',
  'PY_FORMAT_SIZE_T': '"z"',
- 'PY_LDFLAGS': "-s -Wl,-rpath,'$ORIGIN/../lib'",
+ 'PY_LDFLAGS': '',
  'PY_LDFLAGS_NODIST': '',
  'PY_SSL_DEFAULT_CIPHERS': 1,
  'PY_SSL_DEFAULT_CIPHER_STRING': 0,
- 'PY_STDMODULE_CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv '
-                        '-O3 -Wall -std=c99 -Wextra -Wno-unused-result '
+ 'PY_STDMODULE_CFLAGS': '-Wno-unused-result -Wsign-compare -DNDEBUG -g  -O3 '
+                        '-Wall -std=c99 -Wextra -Wno-unused-result '
                         '-Wno-unused-parameter -Wno-missing-field-initializers '
                         '-Werror=implicit-function-declaration  '
                         '-I/tmpfs/src/git/cpython3/Include/internal -IObjects '

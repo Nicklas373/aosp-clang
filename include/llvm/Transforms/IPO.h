@@ -25,7 +25,6 @@ class StringRef;
 class ModuleSummaryIndex;
 class ModulePass;
 class Pass;
-class Function;
 class BasicBlock;
 class GlobalValue;
 class raw_ostream;
@@ -151,6 +150,10 @@ ModulePass *createDeadArgHackingPass();
 /// equal to maxElements (maxElements == 0 means always promote).
 ///
 Pass *createArgumentPromotionPass(unsigned maxElements = 3);
+
+//===----------------------------------------------------------------------===//
+/// createOpenMPOptLegacyPass - OpenMP specific optimizations.
+Pass *createOpenMPOptLegacyPass();
 
 //===----------------------------------------------------------------------===//
 /// createIPConstantPropagationPass - This pass propagates constants from call

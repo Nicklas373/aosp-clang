@@ -129,8 +129,8 @@ public:
 
     void clear();
     void dump(raw_ostream &OS, DIDumpOptions DumpOptions) const;
-    Error parse(const DWARFDataExtractor &DebugLineData, uint64_t *OffsetPtr,
-                function_ref<void(Error)> RecoverableErrorCallback,
+    Error parse(DWARFDataExtractor Data, uint64_t *OffsetPtr,
+                function_ref<void(Error)> RecoverableErrorHandler,
                 const DWARFContext &Ctx, const DWARFUnit *U = nullptr);
   };
 
@@ -143,7 +143,7 @@ public:
     void reset(bool DefaultIsStmt);
     void dump(raw_ostream &OS) const;
 
-    static void dumpTableHeader(raw_ostream &OS);
+    static void dumpTableHeader(raw_ostream &OS, unsigned Indent);
 
     static bool orderByAddress(const Row &LHS, const Row &RHS) {
       return std::tie(LHS.Address.SectionIndex, LHS.Address.Address) <
@@ -275,8 +275,8 @@ public:
     /// Parse prologue and all rows.
     Error parse(DWARFDataExtractor &DebugLineData, uint64_t *OffsetPtr,
                 const DWARFContext &Ctx, const DWARFUnit *U,
-                function_ref<void(Error)> RecoverableErrorCallback,
-                raw_ostream *OS = nullptr);
+                function_ref<void(Error)> RecoverableErrorHandler,
+                raw_ostream *OS = nullptr, bool Verbose = false);
 
     using RowVector = std::vector<Row>;
     using RowIter = RowVector::const_iterator;
@@ -304,7 +304,7 @@ public:
   Expected<const LineTable *>
   getOrParseLineTable(DWARFDataExtractor &DebugLineData, uint64_t Offset,
                       const DWARFContext &Ctx, const DWARFUnit *U,
-                      function_ref<void(Error)> RecoverableErrorCallback);
+                      function_ref<void(Error)> RecoverableErrorHandler);
 
   /// Helper to allow for parsing of an entire .debug_line section in sequence.
   class SectionParser {
@@ -317,29 +317,29 @@ public:
                   tu_range TUs);
 
     /// Get the next line table from the section. Report any issues via the
-    /// callbacks.
+    /// handlers.
     ///
-    /// \param RecoverableErrorCallback - any issues that don't prevent further
-    /// parsing of the table will be reported through this callback.
-    /// \param UnrecoverableErrorCallback - any issues that prevent further
-    /// parsing of the table will be reported through this callback.
+    /// \param RecoverableErrorHandler - any issues that don't prevent further
+    /// parsing of the table will be reported through this handler.
+    /// \param UnrecoverableErrorHandler - any issues that prevent further
+    /// parsing of the table will be reported through this handler.
     /// \param OS - if not null, the parser will print information about the
     /// table as it parses it.
-    LineTable
-    parseNext(
-        function_ref<void(Error)> RecoverableErrorCallback,
-        function_ref<void(Error)> UnrecoverableErrorCallback,
-        raw_ostream *OS = nullptr);
+    /// \param Verbose - if true, the parser will print verbose information when
+    /// printing to the output.
+    LineTable parseNext(function_ref<void(Error)> RecoverableErrorHandler,
+                        function_ref<void(Error)> UnrecoverableErrorHandler,
+                        raw_ostream *OS = nullptr, bool Verbose = false);
 
     /// Skip the current line table and go to the following line table (if
     /// present) immediately.
     ///
-    /// \param RecoverableErrorCallback - report any recoverable prologue
-    /// parsing issues via this callback.
-    /// \param UnrecoverableErrorCallback - report any unrecoverable prologue
-    /// parsing issues via this callback.
-    void skip(function_ref<void(Error)> RecoverableErrorCallback,
-              function_ref<void(Error)> UnrecoverableErrorCallback);
+    /// \param RecoverableErrorHandler - report any recoverable prologue
+    /// parsing issues via this handler.
+    /// \param UnrecoverableErrorHandler - report any unrecoverable prologue
+    /// parsing issues via this handler.
+    void skip(function_ref<void(Error)> RecoverableErrorHandler,
+              function_ref<void(Error)> UnrecoverableErrorHandler);
 
     /// Indicates if the parser has parsed as much as possible.
     ///
@@ -364,15 +364,47 @@ public:
 
 private:
   struct ParsingState {
-    ParsingState(struct LineTable *LT);
+    ParsingState(struct LineTable *LT, uint64_t TableOffset,
+                 function_ref<void(Error)> ErrorHandler);
 
     void resetRowAndSequence();
     void appendRowToMatrix();
+
+    /// Advance the address by the \p OperationAdvance value. \returns the
+    /// amount advanced by.
+    uint64_t advanceAddr(uint64_t OperationAdvance, uint8_t Opcode,
+                         uint64_t OpcodeOffset);
+
+    struct AddrAndAdjustedOpcode {
+      uint64_t AddrDelta;
+      uint8_t AdjustedOpcode;
+    };
+
+    /// Advance the address as required by the specified \p Opcode.
+    /// \returns the amount advanced by and the calculated adjusted opcode.
+    AddrAndAdjustedOpcode advanceAddrForOpcode(uint8_t Opcode,
+                                               uint64_t OpcodeOffset);
+
+    struct AddrAndLineDelta {
+      uint64_t Address;
+      int32_t Line;
+    };
+
+    /// Advance the line and address as required by the specified special \p
+    /// Opcode. \returns the address and line delta.
+    AddrAndLineDelta handleSpecialOpcode(uint8_t Opcode, uint64_t OpcodeOffset);
 
     /// Line table we're currently parsing.
     struct LineTable *LineTable;
     struct Row Row;
     struct Sequence Sequence;
+
+  private:
+    uint64_t LineTableOffset;
+
+    bool ReportAdvanceAddrProblem = true;
+    bool ReportBadLineRange = true;
+    function_ref<void(Error)> ErrorHandler;
   };
 
   using LineTableMapTy = std::map<uint64_t, LineTable>;

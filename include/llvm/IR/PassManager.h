@@ -47,8 +47,8 @@
 #include "llvm/IR/PassManagerInternal.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/Debug.h"
+#include "llvm/Support/TimeProfiler.h"
 #include "llvm/Support/TypeName.h"
-#include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -503,9 +503,6 @@ public:
 
     for (unsigned Idx = 0, Size = Passes.size(); Idx != Size; ++Idx) {
       auto *P = Passes[Idx].get();
-      if (DebugLogging)
-        dbgs() << "Running pass: " << P->name() << " on " << IR.getName()
-               << "\n";
 
       // Check the PassInstrumentation's BeforePass callbacks before running the
       // pass, skip its execution completely if asked to (callback returns
@@ -513,7 +510,15 @@ public:
       if (!PI.runBeforePass<IRUnitT>(*P, IR))
         continue;
 
-      PreservedAnalyses PassPA = P->run(IR, AM, ExtraArgs...);
+      if (DebugLogging)
+        dbgs() << "Running pass: " << P->name() << " on " << IR.getName()
+               << "\n";
+
+      PreservedAnalyses PassPA;
+      {
+        TimeTraceScope TimeScope(P->name(), IR.getName());
+        PassPA = P->run(IR, AM, ExtraArgs...);
+      }
 
       // Call onto PassInstrumentation's AfterPass callbacks immediately after
       // running the pass.
@@ -795,6 +800,16 @@ public:
     return &static_cast<ResultModelT *>(ResultConcept)->Result;
   }
 
+  /// Verify that the given Result cannot be invalidated, assert otherwise.
+  template <typename PassT>
+  void verifyNotInvalidated(IRUnitT &IR, typename PassT::Result *Result) const {
+    PreservedAnalyses PA = PreservedAnalyses::none();
+    SmallDenseMap<AnalysisKey *, bool, 8> IsResultInvalidated;
+    Invalidator Inv(IsResultInvalidated, AnalysisResults);
+    assert(!Result->invalidate(IR, PA, Inv) &&
+           "Cached result cannot be invalidated");
+  }
+
   /// Register an analysis pass with the manager.
   ///
   /// The parameter is a callable whose result is an analysis pass. This allows
@@ -1060,7 +1075,24 @@ public:
   public:
     explicit Result(const AnalysisManagerT &OuterAM) : OuterAM(&OuterAM) {}
 
-    const AnalysisManagerT &getManager() const { return *OuterAM; }
+    /// Get a cached analysis. If the analysis can be invalidated, this will
+    /// assert.
+    template <typename PassT, typename IRUnitTParam>
+    typename PassT::Result *getCachedResult(IRUnitTParam &IR) const {
+      typename PassT::Result *Res =
+          OuterAM->template getCachedResult<PassT>(IR);
+      if (Res)
+        OuterAM->template verifyNotInvalidated<PassT>(IR, Res);
+      return Res;
+    }
+
+    /// Method provided for unit testing, not intended for general use.
+    template <typename PassT, typename IRUnitTParam>
+    bool cachedResultExists(IRUnitTParam &IR) const {
+      typename PassT::Result *Res =
+          OuterAM->template getCachedResult<PassT>(IR);
+      return Res != nullptr;
+    }
 
     /// When invalidation occurs, remove any registered invalidation events.
     bool invalidate(
@@ -1199,7 +1231,12 @@ public:
       // false).
       if (!PI.runBeforePass<Function>(Pass, F))
         continue;
-      PreservedAnalyses PassPA = Pass.run(F, FAM);
+
+      PreservedAnalyses PassPA;
+      {
+        TimeTraceScope TimeScope(Pass.name(), F.getName());
+        PassPA = Pass.run(F, FAM);
+      }
 
       PI.runAfterPass(Pass, F);
 
