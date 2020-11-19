@@ -10,3 +10,4 @@ This is only cloned prebuilt Clang by Google, just grab it on specific branch if
                 - Clang 10.0.2 r370808 (build 6170260)
                 - Clang 10.0.3 r377782 (build 6189010)
 		- Clang 11.0.0 r383902 (build 6443078)
+		- Clang 11.0.5 r399163b
