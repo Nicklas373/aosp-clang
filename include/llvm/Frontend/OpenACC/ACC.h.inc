@@ -73,7 +73,7 @@ enum class Clause {
   ACCC_delete,
   ACCC_detach,
   ACCC_device,
-  ACCC_devicenum,
+  ACCC_device_num,
   ACCC_deviceptr,
   ACCC_device_resident,
   ACCC_device_type,
@@ -122,7 +122,7 @@ constexpr auto ACCC_default_async = llvm::acc::Clause::ACCC_default_async;
 constexpr auto ACCC_delete = llvm::acc::Clause::ACCC_delete;
 constexpr auto ACCC_detach = llvm::acc::Clause::ACCC_detach;
 constexpr auto ACCC_device = llvm::acc::Clause::ACCC_device;
-constexpr auto ACCC_devicenum = llvm::acc::Clause::ACCC_devicenum;
+constexpr auto ACCC_device_num = llvm::acc::Clause::ACCC_device_num;
 constexpr auto ACCC_deviceptr = llvm::acc::Clause::ACCC_deviceptr;
 constexpr auto ACCC_device_resident = llvm::acc::Clause::ACCC_device_resident;
 constexpr auto ACCC_device_type = llvm::acc::Clause::ACCC_device_type;

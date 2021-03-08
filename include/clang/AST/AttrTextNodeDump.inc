@@ -401,6 +401,11 @@
     if (SA->getMode())
       OS << " " << SA->getMode()->getName();
   }
+  void VisitNSErrorDomainAttr(const NSErrorDomainAttr *A) {
+    const auto *SA = cast<NSErrorDomainAttr>(A); (void)SA;
+    OS << " ";
+    dumpBareDeclRef(SA->getErrorDomain());
+  }
   void VisitNoBuiltinAttr(const NoBuiltinAttr *A) {
     const auto *SA = cast<NoBuiltinAttr>(A); (void)SA;
     for (const auto &Val : SA->builtinNames())
@@ -492,6 +497,7 @@
       OS << " DT_Any";
       break;
     }
+    OS << " " << SA->getLevel();
   }
   void VisitOMPDeclareVariantAttr(const OMPDeclareVariantAttr *A) {
     const auto *SA = cast<OMPDeclareVariantAttr>(A); (void)SA;
@@ -727,6 +733,46 @@
     const auto *SA = cast<SuppressAttr>(A); (void)SA;
     for (const auto &Val : SA->diagnosticIdentifiers())
       OS << " " << Val;
+  }
+  void VisitSwiftBridgeAttr(const SwiftBridgeAttr *A) {
+    const auto *SA = cast<SwiftBridgeAttr>(A); (void)SA;
+    OS << " \"" << SA->getSwiftType() << "\"";
+  }
+  void VisitSwiftErrorAttr(const SwiftErrorAttr *A) {
+    const auto *SA = cast<SwiftErrorAttr>(A); (void)SA;
+    switch(SA->getConvention()) {
+    case SwiftErrorAttr::None:
+      OS << " None";
+      break;
+    case SwiftErrorAttr::NonNullError:
+      OS << " NonNullError";
+      break;
+    case SwiftErrorAttr::NullResult:
+      OS << " NullResult";
+      break;
+    case SwiftErrorAttr::ZeroResult:
+      OS << " ZeroResult";
+      break;
+    case SwiftErrorAttr::NonZeroResult:
+      OS << " NonZeroResult";
+      break;
+    }
+  }
+  void VisitSwiftNameAttr(const SwiftNameAttr *A) {
+    const auto *SA = cast<SwiftNameAttr>(A); (void)SA;
+    OS << " \"" << SA->getName() << "\"";
+  }
+  void VisitSwiftNewTypeAttr(const SwiftNewTypeAttr *A) {
+    const auto *SA = cast<SwiftNewTypeAttr>(A); (void)SA;
+    OS << " " << A->getSpelling();
+    switch(SA->getNewtypeKind()) {
+    case SwiftNewTypeAttr::NK_Struct:
+      OS << " NK_Struct";
+      break;
+    case SwiftNewTypeAttr::NK_Enum:
+      OS << " NK_Enum";
+      break;
+    }
   }
   void VisitTLSModelAttr(const TLSModelAttr *A) {
     const auto *SA = cast<TLSModelAttr>(A); (void)SA;

@@ -167,6 +167,8 @@ namespace omp {
   // Sets for declare target
 
   static OmpClauseSet allowedClauses_OMPD_declare_target {
+    llvm::omp::Clause::OMPC_to,
+    llvm::omp::Clause::OMPC_link,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_declare_target {
@@ -504,6 +506,7 @@ namespace omp {
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_end_sections {
+    llvm::omp::Clause::OMPC_nowait,
   };
 
   static OmpClauseSet allowedExclusiveClauses_OMPD_end_sections {
@@ -515,9 +518,11 @@ namespace omp {
   // Sets for end single
 
   static OmpClauseSet allowedClauses_OMPD_end_single {
+    llvm::omp::Clause::OMPC_copyprivate,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_end_single {
+    llvm::omp::Clause::OMPC_nowait,
   };
 
   static OmpClauseSet allowedExclusiveClauses_OMPD_end_single {
@@ -529,6 +534,7 @@ namespace omp {
   // Sets for end workshare
 
   static OmpClauseSet allowedClauses_OMPD_end_workshare {
+    llvm::omp::Clause::OMPC_nowait,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_end_workshare {
@@ -715,7 +721,6 @@ namespace omp {
   // Sets for parallel
 
   static OmpClauseSet allowedClauses_OMPD_parallel {
-    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_private,
     llvm::omp::Clause::OMPC_firstprivate,
     llvm::omp::Clause::OMPC_shared,
@@ -725,6 +730,7 @@ namespace omp {
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_parallel {
+    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_if,
     llvm::omp::Clause::OMPC_num_threads,
     llvm::omp::Clause::OMPC_proc_bind,
@@ -1150,7 +1156,6 @@ namespace omp {
   // Sets for target data
 
   static OmpClauseSet allowedClauses_OMPD_target_data {
-    llvm::omp::Clause::OMPC_map,
     llvm::omp::Clause::OMPC_use_device_ptr,
     llvm::omp::Clause::OMPC_use_device_addr,
   };
@@ -1171,7 +1176,6 @@ namespace omp {
 
   static OmpClauseSet allowedClauses_OMPD_target_enter_data {
     llvm::omp::Clause::OMPC_depend,
-    llvm::omp::Clause::OMPC_map,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_target_enter_data {
@@ -1184,13 +1188,13 @@ namespace omp {
   };
 
   static OmpClauseSet requiredClauses_OMPD_target_enter_data {
+    llvm::omp::Clause::OMPC_map,
   };
 
   // Sets for target exit data
 
   static OmpClauseSet allowedClauses_OMPD_target_exit_data {
     llvm::omp::Clause::OMPC_depend,
-    llvm::omp::Clause::OMPC_map,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_target_exit_data {
@@ -1714,7 +1718,6 @@ namespace omp {
   // Sets for task
 
   static OmpClauseSet allowedClauses_OMPD_task {
-    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_private,
     llvm::omp::Clause::OMPC_firstprivate,
     llvm::omp::Clause::OMPC_shared,
@@ -1728,6 +1731,7 @@ namespace omp {
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_task {
+    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_if,
     llvm::omp::Clause::OMPC_final,
     llvm::omp::Clause::OMPC_priority,
@@ -1762,7 +1766,6 @@ namespace omp {
     llvm::omp::Clause::OMPC_private,
     llvm::omp::Clause::OMPC_firstprivate,
     llvm::omp::Clause::OMPC_lastprivate,
-    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_untied,
     llvm::omp::Clause::OMPC_mergeable,
     llvm::omp::Clause::OMPC_nogroup,
@@ -1772,6 +1775,7 @@ namespace omp {
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_taskloop {
+    llvm::omp::Clause::OMPC_default,
     llvm::omp::Clause::OMPC_if,
     llvm::omp::Clause::OMPC_collapse,
     llvm::omp::Clause::OMPC_final,
@@ -1826,6 +1830,7 @@ namespace omp {
   // Sets for taskwait
 
   static OmpClauseSet allowedClauses_OMPD_taskwait {
+    llvm::omp::Clause::OMPC_depend,
   };
 
   static OmpClauseSet allowedOnceClauses_OMPD_taskwait {
@@ -2113,15 +2118,7 @@ namespace omp {
 #ifdef GEN_FLANG_DIRECTIVE_CLAUSE_MAP
 #undef GEN_FLANG_DIRECTIVE_CLAUSE_MAP
 
-struct OpenMPDirectiveClauses {
-  const OmpClauseSet allowed;
-  const OmpClauseSet allowedOnce;
-  const OmpClauseSet allowedExclusive;
-  const OmpClauseSet requiredOneOf;
-};
-
-std::unordered_map<llvm::omp::Directive, OpenMPDirectiveClauses>
-    directiveClausesTable = {
+{
   {llvm::omp::Directive::OMPD_allocate,
     {
       llvm::omp::allowedClauses_OMPD_allocate,
@@ -2802,7 +2799,423 @@ std::unordered_map<llvm::omp::Directive, OpenMPDirectiveClauses>
       llvm::omp::requiredClauses_OMPD_workshare,
     }
   },
-};
+}
 
 #endif // GEN_FLANG_DIRECTIVE_CLAUSE_MAP
+
+#ifdef GEN_FLANG_CLAUSE_PARSER_CLASSES
+#undef GEN_FLANG_CLAUSE_PARSER_CLASSES
+
+EMPTY_CLASS(AcqRel);
+EMPTY_CLASS(Acquire);
+EMPTY_CLASS(Affinity);
+EMPTY_CLASS(Allocator);
+EMPTY_CLASS(AtomicDefaultMemOrder);
+EMPTY_CLASS(Capture);
+WRAPPER_CLASS(Collapse, ScalarIntConstantExpr);
+WRAPPER_CLASS(Copyprivate, OmpObjectList);
+WRAPPER_CLASS(Copyin, OmpObjectList);
+EMPTY_CLASS(Depobj);
+EMPTY_CLASS(Destroy);
+EMPTY_CLASS(Detach);
+WRAPPER_CLASS(Device, ScalarIntExpr);
+EMPTY_CLASS(DeviceType);
+EMPTY_CLASS(DynamicAllocators);
+EMPTY_CLASS(Exclusive);
+WRAPPER_CLASS(Final, ScalarLogicalExpr);
+WRAPPER_CLASS(Firstprivate, OmpObjectList);
+EMPTY_CLASS(Flush);
+WRAPPER_CLASS(From, OmpObjectList);
+WRAPPER_CLASS(Grainsize, ScalarIntExpr);
+WRAPPER_CLASS(Hint, ConstantExpr);
+EMPTY_CLASS(InReduction);
+EMPTY_CLASS(Inbranch);
+EMPTY_CLASS(Inclusive);
+WRAPPER_CLASS(IsDevicePtr, std::list<Name>);
+WRAPPER_CLASS(Lastprivate, OmpObjectList);
+WRAPPER_CLASS(Link, OmpObjectList);
+EMPTY_CLASS(Match);
+EMPTY_CLASS(Mergeable);
+EMPTY_CLASS(Nogroup);
+EMPTY_CLASS(Nontemporal);
+EMPTY_CLASS(Notinbranch);
+WRAPPER_CLASS(NumTasks, ScalarIntExpr);
+WRAPPER_CLASS(NumTeams, ScalarIntExpr);
+WRAPPER_CLASS(NumThreads, ScalarIntExpr);
+EMPTY_CLASS(Order);
+WRAPPER_CLASS(Ordered, std::optional<ScalarIntConstantExpr>);
+WRAPPER_CLASS(Priority, ScalarIntExpr);
+WRAPPER_CLASS(Private, OmpObjectList);
+EMPTY_CLASS(Read);
+EMPTY_CLASS(Relaxed);
+EMPTY_CLASS(Release);
+EMPTY_CLASS(ReverseOffload);
+WRAPPER_CLASS(Safelen, ScalarIntConstantExpr);
+EMPTY_CLASS(SeqCst);
+WRAPPER_CLASS(Shared, OmpObjectList);
+EMPTY_CLASS(Simd);
+WRAPPER_CLASS(Simdlen, ScalarIntConstantExpr);
+EMPTY_CLASS(TaskReduction);
+WRAPPER_CLASS(ThreadLimit, ScalarIntExpr);
+EMPTY_CLASS(Threadprivate);
+EMPTY_CLASS(Threads);
+WRAPPER_CLASS(To, OmpObjectList);
+EMPTY_CLASS(UnifiedAddress);
+EMPTY_CLASS(UnifiedSharedMemory);
+WRAPPER_CLASS(Uniform, std::list<Name>);
+EMPTY_CLASS(Unknown);
+EMPTY_CLASS(Untied);
+EMPTY_CLASS(Update);
+EMPTY_CLASS(UseDeviceAddr);
+WRAPPER_CLASS(UseDevicePtr, std::list<Name>);
+EMPTY_CLASS(UsesAllocators);
+EMPTY_CLASS(Write);
+
+#endif // GEN_FLANG_CLAUSE_PARSER_CLASSES
+
+#ifdef GEN_FLANG_CLAUSE_PARSER_CLASSES_LIST
+#undef GEN_FLANG_CLAUSE_PARSER_CLASSES_LIST
+
+AcqRel
+, Acquire
+, Affinity
+, OmpAlignedClause
+, OmpAllocateClause
+, Allocator
+, AtomicDefaultMemOrder
+, Capture
+, Collapse
+, Copyprivate
+, Copyin
+, OmpDefaultClause
+, OmpDefaultmapClause
+, OmpDependClause
+, Depobj
+, Destroy
+, Detach
+, Device
+, DeviceType
+, OmpDistScheduleClause
+, DynamicAllocators
+, Exclusive
+, Final
+, Firstprivate
+, Flush
+, From
+, Grainsize
+, Hint
+, OmpIfClause
+, InReduction
+, Inbranch
+, Inclusive
+, IsDevicePtr
+, Lastprivate
+, OmpLinearClause
+, Link
+, OmpMapClause
+, Match
+, Mergeable
+, Nogroup
+, OmpNowait
+, Nontemporal
+, Notinbranch
+, NumTasks
+, NumTeams
+, NumThreads
+, Order
+, Ordered
+, Priority
+, Private
+, OmpProcBindClause
+, Read
+, OmpReductionClause
+, Relaxed
+, Release
+, ReverseOffload
+, Safelen
+, OmpScheduleClause
+, SeqCst
+, Shared
+, Simd
+, Simdlen
+, TaskReduction
+, ThreadLimit
+, Threadprivate
+, Threads
+, To
+, UnifiedAddress
+, UnifiedSharedMemory
+, Uniform
+, Unknown
+, Untied
+, Update
+, UseDeviceAddr
+, UseDevicePtr
+, UsesAllocators
+, Write
+
+#endif // GEN_FLANG_CLAUSE_PARSER_CLASSES_LIST
+
+#ifdef GEN_FLANG_DUMP_PARSE_TREE_CLAUSES
+#undef GEN_FLANG_DUMP_PARSE_TREE_CLAUSES
+
+NODE(OmpClause, AcqRel)
+NODE(OmpClause, Acquire)
+NODE(OmpClause, Affinity)
+NODE(OmpClause, Allocator)
+NODE(OmpClause, AtomicDefaultMemOrder)
+NODE(OmpClause, Capture)
+NODE(OmpClause, Collapse)
+NODE(OmpClause, Copyprivate)
+NODE(OmpClause, Copyin)
+NODE(OmpClause, Depobj)
+NODE(OmpClause, Destroy)
+NODE(OmpClause, Detach)
+NODE(OmpClause, Device)
+NODE(OmpClause, DeviceType)
+NODE(OmpClause, DynamicAllocators)
+NODE(OmpClause, Exclusive)
+NODE(OmpClause, Final)
+NODE(OmpClause, Firstprivate)
+NODE(OmpClause, Flush)
+NODE(OmpClause, From)
+NODE(OmpClause, Grainsize)
+NODE(OmpClause, Hint)
+NODE(OmpClause, InReduction)
+NODE(OmpClause, Inbranch)
+NODE(OmpClause, Inclusive)
+NODE(OmpClause, IsDevicePtr)
+NODE(OmpClause, Lastprivate)
+NODE(OmpClause, Link)
+NODE(OmpClause, Match)
+NODE(OmpClause, Mergeable)
+NODE(OmpClause, Nogroup)
+NODE(OmpClause, Nontemporal)
+NODE(OmpClause, Notinbranch)
+NODE(OmpClause, NumTasks)
+NODE(OmpClause, NumTeams)
+NODE(OmpClause, NumThreads)
+NODE(OmpClause, Order)
+NODE(OmpClause, Ordered)
+NODE(OmpClause, Priority)
+NODE(OmpClause, Private)
+NODE(OmpClause, Read)
+NODE(OmpClause, Relaxed)
+NODE(OmpClause, Release)
+NODE(OmpClause, ReverseOffload)
+NODE(OmpClause, Safelen)
+NODE(OmpClause, SeqCst)
+NODE(OmpClause, Shared)
+NODE(OmpClause, Simd)
+NODE(OmpClause, Simdlen)
+NODE(OmpClause, TaskReduction)
+NODE(OmpClause, ThreadLimit)
+NODE(OmpClause, Threadprivate)
+NODE(OmpClause, Threads)
+NODE(OmpClause, To)
+NODE(OmpClause, UnifiedAddress)
+NODE(OmpClause, UnifiedSharedMemory)
+NODE(OmpClause, Uniform)
+NODE(OmpClause, Unknown)
+NODE(OmpClause, Untied)
+NODE(OmpClause, Update)
+NODE(OmpClause, UseDeviceAddr)
+NODE(OmpClause, UseDevicePtr)
+NODE(OmpClause, UsesAllocators)
+NODE(OmpClause, Write)
+
+#endif // GEN_FLANG_DUMP_PARSE_TREE_CLAUSES
+
+#ifdef GEN_FLANG_CLAUSE_UNPARSE
+#undef GEN_FLANG_CLAUSE_UNPARSE
+
+void Before(const OmpClause::AcqRel &) { Word("ACQ_REL"); }
+void Before(const OmpClause::Acquire &) { Word("ACQUIRE"); }
+void Before(const OmpClause::Affinity &) { Word("AFFINITY"); }
+void Before(const OmpClause::Allocator &) { Word("ALLOCATOR"); }
+void Before(const OmpClause::AtomicDefaultMemOrder &) { Word("ATOMIC_DEFAULT_MEM_ORDER"); }
+void Before(const OmpClause::Capture &) { Word("CAPTURE"); }
+void Unparse(const OmpClause::Collapse &x) {
+  Word("COLLAPSE");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::Copyprivate &x) {
+  Word("COPYPRIVATE");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::Copyin &x) {
+  Word("COPYIN");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::Depobj &) { Word("DEPOBJ"); }
+void Before(const OmpClause::Destroy &) { Word("DESTROY"); }
+void Before(const OmpClause::Detach &) { Word("DETACH"); }
+void Unparse(const OmpClause::Device &x) {
+  Word("DEVICE");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::DeviceType &) { Word("DEVICE_TYPE"); }
+void Before(const OmpClause::DynamicAllocators &) { Word("DYNAMIC_ALLOCATORS"); }
+void Before(const OmpClause::Exclusive &) { Word("EXCLUSIVE"); }
+void Unparse(const OmpClause::Final &x) {
+  Word("FINAL");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::Firstprivate &x) {
+  Word("FIRSTPRIVATE");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::Flush &) { Word("FLUSH"); }
+void Unparse(const OmpClause::From &x) {
+  Word("FROM");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::Grainsize &x) {
+  Word("GRAINSIZE");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::Hint &x) {
+  Word("HINT");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::InReduction &) { Word("IN_REDUCTION"); }
+void Before(const OmpClause::Inbranch &) { Word("INBRANCH"); }
+void Before(const OmpClause::Inclusive &) { Word("INCLUSIVE"); }
+void Unparse(const OmpClause::IsDevicePtr &x) {
+  Word("IS_DEVICE_PTR");
+  Put("(");
+  Walk(x.v, ",");
+  Put(")");
+}
+void Unparse(const OmpClause::Lastprivate &x) {
+  Word("LASTPRIVATE");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::Link &x) {
+  Word("LINK");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::Match &) { Word("MATCH"); }
+void Before(const OmpClause::Mergeable &) { Word("MERGEABLE"); }
+void Before(const OmpClause::Nogroup &) { Word("NOGROUP"); }
+void Before(const OmpClause::Nontemporal &) { Word("NONTEMPORAL"); }
+void Before(const OmpClause::Notinbranch &) { Word("NOTINBRANCH"); }
+void Unparse(const OmpClause::NumTasks &x) {
+  Word("NUM_TASKS");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::NumTeams &x) {
+  Word("NUM_TEAMS");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::NumThreads &x) {
+  Word("NUM_THREADS");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::Order &) { Word("ORDER"); }
+void Unparse(const OmpClause::Ordered &x) {
+  Word("ORDERED");
+  Walk("(", x.v, ")");
+}
+void Unparse(const OmpClause::Priority &x) {
+  Word("PRIORITY");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Unparse(const OmpClause::Private &x) {
+  Word("PRIVATE");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::Read &) { Word("READ"); }
+void Before(const OmpClause::Relaxed &) { Word("RELAXED"); }
+void Before(const OmpClause::Release &) { Word("RELEASE"); }
+void Before(const OmpClause::ReverseOffload &) { Word("REVERSE_OFFLOAD"); }
+void Unparse(const OmpClause::Safelen &x) {
+  Word("SAFELEN");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::SeqCst &) { Word("SEQ_CST"); }
+void Unparse(const OmpClause::Shared &x) {
+  Word("SHARED");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::Simd &) { Word("SIMD"); }
+void Unparse(const OmpClause::Simdlen &x) {
+  Word("SIMDLEN");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::TaskReduction &) { Word("TASK_REDUCTION"); }
+void Unparse(const OmpClause::ThreadLimit &x) {
+  Word("THREAD_LIMIT");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::Threadprivate &) { Word("THREADPRIVATE"); }
+void Before(const OmpClause::Threads &) { Word("THREADS"); }
+void Unparse(const OmpClause::To &x) {
+  Word("TO");
+  Put("(");
+  Walk(x.v);
+  Put(")");
+}
+void Before(const OmpClause::UnifiedAddress &) { Word("UNIFIED_ADDRESS"); }
+void Before(const OmpClause::UnifiedSharedMemory &) { Word("UNIFIED_SHARED_MEMORY"); }
+void Unparse(const OmpClause::Uniform &x) {
+  Word("UNIFORM");
+  Put("(");
+  Walk(x.v, ",");
+  Put(")");
+}
+void Before(const OmpClause::Unknown &) { Word("UNKNOWN"); }
+void Before(const OmpClause::Untied &) { Word("UNTIED"); }
+void Before(const OmpClause::Update &) { Word("UPDATE"); }
+void Before(const OmpClause::UseDeviceAddr &) { Word("USE_DEVICE_ADDR"); }
+void Unparse(const OmpClause::UseDevicePtr &x) {
+  Word("USE_DEVICE_PTR");
+  Put("(");
+  Walk(x.v, ",");
+  Put(")");
+}
+void Before(const OmpClause::UsesAllocators &) { Word("USES_ALLOCATORS"); }
+void Before(const OmpClause::Write &) { Word("WRITE"); }
+
+#endif // GEN_FLANG_CLAUSE_UNPARSE
 

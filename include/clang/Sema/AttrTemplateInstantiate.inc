@@ -573,6 +573,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<LifetimeBoundAttr>(At);
       return A->clone(C);
     }
+    case attr::Likely: {
+      const auto *A = cast<LikelyAttr>(At);
+      return A->clone(C);
+    }
     case attr::LoaderUninitialized: {
       const auto *A = cast<LoaderUninitializedAttr>(At);
       return A->clone(C);
@@ -684,6 +688,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::NSConsumesSelf: {
       const auto *A = cast<NSConsumesSelfAttr>(At);
+      return A->clone(C);
+    }
+    case attr::NSErrorDomain: {
+      const auto *A = cast<NSErrorDomainAttr>(At);
       return A->clone(C);
     }
     case attr::NSReturnsAutoreleased: {
@@ -922,6 +930,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<ObjCNonLazyClassAttr>(At);
       return A->clone(C);
     }
+    case attr::ObjCNonRuntimeProtocol: {
+      const auto *A = cast<ObjCNonRuntimeProtocolAttr>(At);
+      return A->clone(C);
+    }
     case attr::ObjCOwnership: {
       const auto *A = cast<ObjCOwnershipAttr>(At);
       return A->clone(C);
@@ -972,6 +984,14 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::OpenCLGlobalAddressSpace: {
       const auto *A = cast<OpenCLGlobalAddressSpaceAttr>(At);
+      return A->clone(C);
+    }
+    case attr::OpenCLGlobalDeviceAddressSpace: {
+      const auto *A = cast<OpenCLGlobalDeviceAddressSpaceAttr>(At);
+      return A->clone(C);
+    }
+    case attr::OpenCLGlobalHostAddressSpace: {
+      const auto *A = cast<OpenCLGlobalHostAddressSpaceAttr>(At);
       return A->clone(C);
     }
     case attr::OpenCLIntelReqdSubGroupSize: {
@@ -1223,8 +1243,20 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<StdCallAttr>(At);
       return A->clone(C);
     }
+    case attr::StrictFP: {
+      const auto *A = cast<StrictFPAttr>(At);
+      return A->clone(C);
+    }
     case attr::Suppress: {
       const auto *A = cast<SuppressAttr>(At);
+      return A->clone(C);
+    }
+    case attr::SwiftBridge: {
+      const auto *A = cast<SwiftBridgeAttr>(At);
+      return A->clone(C);
+    }
+    case attr::SwiftBridgedTypedef: {
+      const auto *A = cast<SwiftBridgedTypedefAttr>(At);
       return A->clone(C);
     }
     case attr::SwiftCall: {
@@ -1235,12 +1267,32 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
       const auto *A = cast<SwiftContextAttr>(At);
       return A->clone(C);
     }
+    case attr::SwiftError: {
+      const auto *A = cast<SwiftErrorAttr>(At);
+      return A->clone(C);
+    }
     case attr::SwiftErrorResult: {
       const auto *A = cast<SwiftErrorResultAttr>(At);
       return A->clone(C);
     }
     case attr::SwiftIndirectResult: {
       const auto *A = cast<SwiftIndirectResultAttr>(At);
+      return A->clone(C);
+    }
+    case attr::SwiftName: {
+      const auto *A = cast<SwiftNameAttr>(At);
+      return A->clone(C);
+    }
+    case attr::SwiftNewType: {
+      const auto *A = cast<SwiftNewTypeAttr>(At);
+      return A->clone(C);
+    }
+    case attr::SwiftObjCMembers: {
+      const auto *A = cast<SwiftObjCMembersAttr>(At);
+      return A->clone(C);
+    }
+    case attr::SwiftPrivate: {
+      const auto *A = cast<SwiftPrivateAttr>(At);
       return A->clone(C);
     }
     case attr::SysVABI: {
@@ -1325,6 +1377,10 @@ Attr *instantiateTemplateAttribute(const Attr *At, ASTContext &C, Sema &S,
     }
     case attr::Uninitialized: {
       const auto *A = cast<UninitializedAttr>(At);
+      return A->clone(C);
+    }
+    case attr::Unlikely: {
+      const auto *A = cast<UnlikelyAttr>(At);
       return A->clone(C);
     }
     case attr::Unused: {
@@ -1763,6 +1819,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::LifetimeBound: {
       return nullptr;
     }
+    case attr::Likely: {
+      return nullptr;
+    }
     case attr::LoaderUninitialized: {
       return nullptr;
     }
@@ -1833,6 +1892,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::NSConsumesSelf: {
+      return nullptr;
+    }
+    case attr::NSErrorDomain: {
       return nullptr;
     }
     case attr::NSReturnsAutoreleased: {
@@ -2012,6 +2074,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::ObjCNonLazyClass: {
       return nullptr;
     }
+    case attr::ObjCNonRuntimeProtocol: {
+      return nullptr;
+    }
     case attr::ObjCOwnership: {
       return nullptr;
     }
@@ -2049,6 +2114,12 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::OpenCLGlobalAddressSpace: {
+      return nullptr;
+    }
+    case attr::OpenCLGlobalDeviceAddressSpace: {
+      return nullptr;
+    }
+    case attr::OpenCLGlobalHostAddressSpace: {
       return nullptr;
     }
     case attr::OpenCLIntelReqdSubGroupSize: {
@@ -2204,7 +2275,16 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::StdCall: {
       return nullptr;
     }
+    case attr::StrictFP: {
+      return nullptr;
+    }
     case attr::Suppress: {
+      return nullptr;
+    }
+    case attr::SwiftBridge: {
+      return nullptr;
+    }
+    case attr::SwiftBridgedTypedef: {
       return nullptr;
     }
     case attr::SwiftCall: {
@@ -2213,10 +2293,25 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
     case attr::SwiftContext: {
       return nullptr;
     }
+    case attr::SwiftError: {
+      return nullptr;
+    }
     case attr::SwiftErrorResult: {
       return nullptr;
     }
     case attr::SwiftIndirectResult: {
+      return nullptr;
+    }
+    case attr::SwiftName: {
+      return nullptr;
+    }
+    case attr::SwiftNewType: {
+      return nullptr;
+    }
+    case attr::SwiftObjCMembers: {
+      return nullptr;
+    }
+    case attr::SwiftPrivate: {
       return nullptr;
     }
     case attr::SysVABI: {
@@ -2268,6 +2363,9 @@ Attr *instantiateTemplateAttributeForDecl(const Attr *At,
       return nullptr;
     }
     case attr::Uninitialized: {
+      return nullptr;
+    }
+    case attr::Unlikely: {
       return nullptr;
     }
     case attr::Unused: {

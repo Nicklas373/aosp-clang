@@ -15,6 +15,16 @@ set_target_properties(clangBasic PROPERTIES
 list(APPEND _IMPORT_CHECK_TARGETS clangBasic )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangBasic "${_IMPORT_PREFIX}/lib64/libclangBasic.a" )
 
+# Import target "clangAPINotes" for configuration "Release"
+set_property(TARGET clangAPINotes APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangAPINotes PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangAPINotes.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangAPINotes )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangAPINotes "${_IMPORT_PREFIX}/lib64/libclangAPINotes.a" )
+
 # Import target "clangLex" for configuration "Release"
 set_property(TARGET clangLex APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clangLex PROPERTIES
@@ -285,6 +295,16 @@ set_target_properties(clangIndex PROPERTIES
 list(APPEND _IMPORT_CHECK_TARGETS clangIndex )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangIndex "${_IMPORT_PREFIX}/lib64/libclangIndex.a" )
 
+# Import target "clangIndexSerialization" for configuration "Release"
+set_property(TARGET clangIndexSerialization APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangIndexSerialization PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangIndexSerialization.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangIndexSerialization )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangIndexSerialization "${_IMPORT_PREFIX}/lib64/libclangIndexSerialization.a" )
+
 # Import target "clangStaticAnalyzerCore" for configuration "Release"
 set_property(TARGET clangStaticAnalyzerCore APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clangStaticAnalyzerCore PROPERTIES
@@ -347,11 +367,11 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_diagtool "${_IMPORT_PREFIX}/bin/diagtool" )
 # Import target "clang" for configuration "Release"
 set_property(TARGET clang APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clang PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/bin/clang-11"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/bin/clang-12"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS clang )
-list(APPEND _IMPORT_CHECK_FILES_FOR_clang "${_IMPORT_PREFIX}/bin/clang-11" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clang "${_IMPORT_PREFIX}/bin/clang-12" )
 
 # Import target "clang-format" for configuration "Release"
 set_property(TARGET clang-format APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -430,12 +450,12 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_clang-refactor "${_IMPORT_PREFIX}/bin/clang-
 # Import target "clang-cpp" for configuration "Release"
 set_property(TARGET clang-cpp APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clang-cpp PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang-cpp.so.11git"
-  IMPORTED_SONAME_RELEASE "libclang-cpp.so.11git"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang-cpp.so.12git"
+  IMPORTED_SONAME_RELEASE "libclang-cpp.so.12git"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS clang-cpp )
-list(APPEND _IMPORT_CHECK_FILES_FOR_clang-cpp "${_IMPORT_PREFIX}/lib64/libclang-cpp.so.11git" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clang-cpp "${_IMPORT_PREFIX}/lib64/libclang-cpp.so.12git" )
 
 # Import target "clang-check" for configuration "Release"
 set_property(TARGET clang-check APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -532,6 +552,16 @@ set_target_properties(clangTidyAbseilModule PROPERTIES
 list(APPEND _IMPORT_CHECK_TARGETS clangTidyAbseilModule )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangTidyAbseilModule "${_IMPORT_PREFIX}/lib64/libclangTidyAbseilModule.a" )
 
+# Import target "clangTidyAlteraModule" for configuration "Release"
+set_property(TARGET clangTidyAlteraModule APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangTidyAlteraModule PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangTidyAlteraModule.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangTidyAlteraModule )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangTidyAlteraModule "${_IMPORT_PREFIX}/lib64/libclangTidyAlteraModule.a" )
+
 # Import target "clangTidyBoostModule" for configuration "Release"
 set_property(TARGET clangTidyBoostModule APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(clangTidyBoostModule PROPERTIES
@@ -561,6 +591,16 @@ set_target_properties(clangTidyCERTModule PROPERTIES
 
 list(APPEND _IMPORT_CHECK_TARGETS clangTidyCERTModule )
 list(APPEND _IMPORT_CHECK_FILES_FOR_clangTidyCERTModule "${_IMPORT_PREFIX}/lib64/libclangTidyCERTModule.a" )
+
+# Import target "clangTidyConcurrencyModule" for configuration "Release"
+set_property(TARGET clangTidyConcurrencyModule APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(clangTidyConcurrencyModule PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclangTidyConcurrencyModule.a"
+  )
+
+list(APPEND _IMPORT_CHECK_TARGETS clangTidyConcurrencyModule )
+list(APPEND _IMPORT_CHECK_FILES_FOR_clangTidyConcurrencyModule "${_IMPORT_PREFIX}/lib64/libclangTidyConcurrencyModule.a" )
 
 # Import target "clangTidyCppCoreGuidelinesModule" for configuration "Release"
 set_property(TARGET clangTidyCppCoreGuidelinesModule APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
@@ -956,22 +996,22 @@ list(APPEND _IMPORT_CHECK_FILES_FOR_clangdRemoteIndex "${_IMPORT_PREFIX}/lib64/l
 # Import target "libclang" for configuration "Release"
 set_property(TARGET libclang APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(libclang PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang.so.11"
-  IMPORTED_SONAME_RELEASE "libclang.so.11git"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang.so.12"
+  IMPORTED_SONAME_RELEASE "libclang.so.12git"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS libclang )
-list(APPEND _IMPORT_CHECK_FILES_FOR_libclang "${_IMPORT_PREFIX}/lib64/libclang.so.11" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_libclang "${_IMPORT_PREFIX}/lib64/libclang.so.12" )
 
 # Import target "libclang_cxx" for configuration "Release"
 set_property(TARGET libclang_cxx APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(libclang_cxx PROPERTIES
-  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang_cxx.so.11"
-  IMPORTED_SONAME_RELEASE "libclang_cxx.so.11git"
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib64/libclang_cxx.so.12"
+  IMPORTED_SONAME_RELEASE "libclang_cxx.so.12git"
   )
 
 list(APPEND _IMPORT_CHECK_TARGETS libclang_cxx )
-list(APPEND _IMPORT_CHECK_FILES_FOR_libclang_cxx "${_IMPORT_PREFIX}/lib64/libclang_cxx.so.11" )
+list(APPEND _IMPORT_CHECK_FILES_FOR_libclang_cxx "${_IMPORT_PREFIX}/lib64/libclang_cxx.so.12" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

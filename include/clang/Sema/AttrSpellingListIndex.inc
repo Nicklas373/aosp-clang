@@ -255,6 +255,11 @@
         return 2;
     break;
   }
+  case AT_ArmSveVectorBits: {
+    if (Name == "arm_sve_vector_bits" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    break;
+  }
   case AT_Artificial: {
     if (Name == "artificial" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -905,6 +910,13 @@
         return 1;
     break;
   }
+  case AT_Likely: {
+    if (Name == "likely" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "")
+        return 0;
+    if (Name == "likely" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 1;
+    break;
+  }
   case AT_LoaderUninitialized: {
     if (Name == "loader_uninitialized" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -1099,6 +1111,11 @@
         return 1;
     if (Name == "ns_consumes_self" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
         return 2;
+    break;
+  }
+  case AT_NSErrorDomain: {
+    if (Name == "ns_error_domain" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
     break;
   }
   case AT_NSReturnsAutoreleased: {
@@ -1595,6 +1612,15 @@
         return 2;
     break;
   }
+  case AT_ObjCNonRuntimeProtocol: {
+    if (Name == "objc_non_runtime_protocol" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "objc_non_runtime_protocol" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "objc_non_runtime_protocol" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
+    break;
+  }
   case AT_ObjCOwnership: {
     if (Name == "objc_ownership" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -1728,6 +1754,24 @@
         return 3;
     if (Name == "opencl_global" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
         return 4;
+    break;
+  }
+  case AT_OpenCLGlobalDeviceAddressSpace: {
+    if (Name == "opencl_global_device" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "opencl_global_device" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "opencl_global_device" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
+    break;
+  }
+  case AT_OpenCLGlobalHostAddressSpace: {
+    if (Name == "opencl_global_host" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "opencl_global_host" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    if (Name == "opencl_global_host" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
+        return 2;
     break;
   }
   case AT_OpenCLIntelReqdSubGroupSize: {
@@ -2159,8 +2203,21 @@
         return 4;
     break;
   }
+  case AT_StrictFP: {
+    break;
+  }
   case AT_Suppress: {
     if (Name == "suppress" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "gsl")
+        return 0;
+    break;
+  }
+  case AT_SwiftBridge: {
+    if (Name == "swift_bridge" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    break;
+  }
+  case AT_SwiftBridgedTypedef: {
+    if (Name == "swift_bridged_typedef" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
     break;
   }
@@ -2182,6 +2239,11 @@
         return 2;
     break;
   }
+  case AT_SwiftError: {
+    if (Name == "swift_error" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    break;
+  }
   case AT_SwiftErrorResult: {
     if (Name == "swift_error_result" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
@@ -2198,6 +2260,28 @@
         return 1;
     if (Name == "swift_indirect_result" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
         return 2;
+    break;
+  }
+  case AT_SwiftName: {
+    if (Name == "swift_name" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    break;
+  }
+  case AT_SwiftNewType: {
+    if (Name == "swift_newtype" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    if (Name == "swift_wrapper" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 1;
+    break;
+  }
+  case AT_SwiftObjCMembers: {
+    if (Name == "swift_objc_members" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
+    break;
+  }
+  case AT_SwiftPrivate: {
+    if (Name == "swift_private" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
+        return 0;
     break;
   }
   case AT_SysVABI: {
@@ -2330,6 +2414,13 @@
     if (Name == "uninitialized" && getSyntax() == AttributeCommonInfo::AS_GNU && Scope == "")
         return 0;
     if (Name == "uninitialized" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "clang")
+        return 1;
+    break;
+  }
+  case AT_Unlikely: {
+    if (Name == "unlikely" && getSyntax() == AttributeCommonInfo::AS_CXX11 && Scope == "")
+        return 0;
+    if (Name == "unlikely" && getSyntax() == AttributeCommonInfo::AS_C2x && Scope == "clang")
         return 1;
     break;
   }

@@ -97,6 +97,7 @@ namespace llvm {
     SpecificBumpPtrAllocator<MCSectionMachO> MachOAllocator;
     SpecificBumpPtrAllocator<MCSectionWasm> WasmAllocator;
     SpecificBumpPtrAllocator<MCSectionXCOFF> XCOFFAllocator;
+    SpecificBumpPtrAllocator<MCInst> MCInstAllocator;
 
     /// Bindings of names to symbols.
     SymbolTable Symbols;
@@ -380,6 +381,11 @@ namespace llvm {
 
     /// @}
 
+    /// \name McInst Management
+
+    /// Create and return a new MC instruction.
+    MCInst *createMCInst();
+
     /// \name Symbol Management
     /// @{
 
@@ -558,9 +564,8 @@ namespace llvm {
 
     MCSectionXCOFF *getXCOFFSection(StringRef Section,
                                     XCOFF::StorageMappingClass MappingClass,
-                                    XCOFF::SymbolType CSectType,
-                                    XCOFF::StorageClass StorageClass,
-                                    SectionKind K,
+                                    XCOFF::SymbolType CSectType, SectionKind K,
+                                    bool MultiSymbolsAllowed = false,
                                     const char *BeginSymName = nullptr);
 
     // Create and save a copy of STI and return a reference to the copy.

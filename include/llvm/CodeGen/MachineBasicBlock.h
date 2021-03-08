@@ -40,6 +40,7 @@ class Printable;
 class SlotIndexes;
 class StringRef;
 class raw_ostream;
+class LiveIntervals;
 class TargetRegisterClass;
 class TargetRegisterInfo;
 
@@ -143,6 +144,10 @@ private:
   /// branch.
   bool AddressTaken = false;
 
+  /// Indicate that this basic block needs its symbol be emitted regardless of
+  /// whether the flow just falls-through to it.
+  bool LabelMustBeEmitted = false;
+
   /// Indicate that this basic block is the entry block of an EH scope, i.e.,
   /// the block that used to have a catchpad or cleanuppad instruction in the
   /// LLVM IR.
@@ -170,8 +175,9 @@ private:
   /// is only computed once and is cached.
   mutable MCSymbol *CachedMCSymbol = nullptr;
 
-  /// Used during basic block sections to mark the end of a basic block.
-  MCSymbol *EndMCSymbol = nullptr;
+  /// Marks the end of the basic block. Used during basic block sections to
+  /// calculate the size of the basic block, or the BB section ending with it.
+  mutable MCSymbol *CachedEndMCSymbol = nullptr;
 
   // Intrusive list support
   MachineBasicBlock() = default;
@@ -201,6 +207,13 @@ public:
   /// Set this block to reflect that it potentially is the target of an indirect
   /// branch.
   void setHasAddressTaken() { AddressTaken = true; }
+
+  /// Test whether this block must have its label emitted.
+  bool hasLabelMustBeEmitted() const { return LabelMustBeEmitted; }
+
+  /// Set this block to reflect that, regardless how we flow to it, we need
+  /// its label be emitted.
+  void setLabelMustBeEmitted() { LabelMustBeEmitted = true; }
 
   /// Return the MachineFunction containing this basic block.
   const MachineFunction *getParent() const { return xParent; }
@@ -421,6 +434,9 @@ public:
 
   bool hasEHPadSuccessor() const;
 
+  /// Returns true if this is the entry block of the function.
+  bool isEntryBlock() const;
+
   /// Returns true if this is the entry block of an EH scope, i.e., the block
   /// that used to have a catchpad or cleanuppad instruction in the LLVM IR.
   bool isEHScopeEntry() const { return IsEHScopeEntry; }
@@ -462,6 +478,9 @@ public:
 
   /// Sets the section ID for this basic block.
   void setSectionID(MBBSectionID V) { SectionID = V; }
+
+  /// Returns the MCSymbol marking the end of this basic block.
+  MCSymbol *getEndSymbol() const;
 
   /// Returns true if this block may have an INLINEASM_BR (overestimate, by
   /// checking if any of the successors are indirect targets of any inlineasm_br
@@ -659,6 +678,17 @@ public:
   bool isEHScopeReturnBlock() const {
     return !empty() && back().isEHScopeReturn();
   }
+
+  /// Split a basic block into 2 pieces at \p SplitPoint. A new block will be
+  /// inserted after this block, and all instructions after \p SplitInst moved
+  /// to it (\p SplitInst will be in the original block). If \p LIS is provided,
+  /// LiveIntervals will be appropriately updated. \return the newly inserted
+  /// block.
+  ///
+  /// If \p UpdateLiveIns is true, this will ensure the live ins list is
+  /// accurate, including for physreg uses/defs in the original block.
+  MachineBasicBlock *splitAt(MachineInstr &SplitInst, bool UpdateLiveIns = true,
+                             LiveIntervals *LIS = nullptr);
 
   /// Split the critical edge from this block to the given successor block, and
   /// return the newly created block, or null if splitting is not possible.
@@ -860,6 +890,14 @@ public:
              bool IsStandalone = true) const;
   void print(raw_ostream &OS, ModuleSlotTracker &MST,
              const SlotIndexes * = nullptr, bool IsStandalone = true) const;
+
+  enum PrintNameFlag {
+    PrintNameIr = (1 << 0), ///< Add IR name where available
+    PrintNameAttributes = (1 << 1), ///< Print attributes
+  };
+
+  void printName(raw_ostream &os, unsigned printNameFlags = PrintNameIr,
+                 ModuleSlotTracker *moduleSlotTracker = nullptr) const;
 
   // Printing method used by LoopInfo.
   void printAsOperand(raw_ostream &OS, bool PrintType = true) const;

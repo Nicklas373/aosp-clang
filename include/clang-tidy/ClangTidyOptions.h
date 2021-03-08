@@ -16,7 +16,6 @@
 #include "llvm/Support/ErrorOr.h"
 #include "llvm/Support/VirtualFileSystem.h"
 #include <functional>
-#include <map>
 #include <string>
 #include <system_error>
 #include <utility>
@@ -56,11 +55,15 @@ struct ClangTidyOptions {
   /// of each registered \c ClangTidyModule.
   static ClangTidyOptions getDefaults();
 
+  /// Overwrites all fields in here by the fields of \p Other that have a value.
+  /// \p Order specifies precedence of \p Other option.
+  ClangTidyOptions &mergeWith(const ClangTidyOptions &Other, unsigned Order);
+
   /// Creates a new \c ClangTidyOptions instance combined from all fields
   /// of this instance overridden by the fields of \p Other that have a value.
   /// \p Order specifies precedence of \p Other option.
-  ClangTidyOptions mergeWith(const ClangTidyOptions &Other,
-                             unsigned Order) const;
+  LLVM_NODISCARD ClangTidyOptions merge(const ClangTidyOptions &Other,
+                                        unsigned Order) const;
 
   /// Checks filter.
   llvm::Optional<std::string> Checks;
@@ -108,7 +111,7 @@ struct ClangTidyOptions {
     unsigned Priority;
   };
   typedef std::pair<std::string, std::string> StringPair;
-  typedef std::map<std::string, ClangTidyValue> OptionMap;
+  typedef llvm::StringMap<ClangTidyValue> OptionMap;
 
   /// Key-value mapping used to store check-specific options.
   OptionMap CheckOptions;

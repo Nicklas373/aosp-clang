@@ -2113,29 +2113,42 @@ const char *AnalyzerNoReturnAttr::getSpelling() const {
 
 // AnnotateAttr implementation
 
-AnnotateAttr *AnnotateAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Annotation, const AttributeCommonInfo &CommonInfo) {
-  auto *A = new (Ctx) AnnotateAttr(Ctx, CommonInfo, Annotation);
+AnnotateAttr *AnnotateAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Annotation, Expr * *Args, unsigned ArgsSize, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) AnnotateAttr(Ctx, CommonInfo, Annotation, Args, ArgsSize);
   A->setImplicit(true);
   if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
     A->setAttributeSpellingListIndex(0);
   return A;
 }
 
-AnnotateAttr *AnnotateAttr::Create(ASTContext &Ctx, llvm::StringRef Annotation, const AttributeCommonInfo &CommonInfo) {
-  auto *A = new (Ctx) AnnotateAttr(Ctx, CommonInfo, Annotation);
+AnnotateAttr *AnnotateAttr::Create(ASTContext &Ctx, llvm::StringRef Annotation, Expr * *Args, unsigned ArgsSize, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) AnnotateAttr(Ctx, CommonInfo, Annotation, Args, ArgsSize);
   if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
     A->setAttributeSpellingListIndex(0);
   return A;
 }
 
-AnnotateAttr *AnnotateAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Annotation, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+AnnotateAttr *AnnotateAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Annotation, Expr * *Args, unsigned ArgsSize, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
   AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
-  return CreateImplicit(Ctx, Annotation, I);
+  return CreateImplicit(Ctx, Annotation, Args, ArgsSize, I);
 }
 
-AnnotateAttr *AnnotateAttr::Create(ASTContext &Ctx, llvm::StringRef Annotation, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+AnnotateAttr *AnnotateAttr::Create(ASTContext &Ctx, llvm::StringRef Annotation, Expr * *Args, unsigned ArgsSize, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
   AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
-  return Create(Ctx, Annotation, I);
+  return Create(Ctx, Annotation, Args, ArgsSize, I);
+}
+
+AnnotateAttr::AnnotateAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef Annotation
+              , Expr * *Args, unsigned ArgsSize
+             )
+  : InheritableParamAttr(Ctx, CommonInfo, attr::Annotate, false, false)
+              , annotationLength(Annotation.size()),annotation(new (Ctx, 1) char[annotationLength])
+              , args_Size(ArgsSize), args_(new (Ctx, 16) Expr *[args_Size])
+  {
+    if (!Annotation.empty())
+      std::memcpy(annotation, Annotation.data(), annotationLength);
+  std::copy(Args, Args + args_Size, args_);
 }
 
 AnnotateAttr::AnnotateAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
@@ -2143,6 +2156,7 @@ AnnotateAttr::AnnotateAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInf
              )
   : InheritableParamAttr(Ctx, CommonInfo, attr::Annotate, false, false)
               , annotationLength(Annotation.size()),annotation(new (Ctx, 1) char[annotationLength])
+              , args_Size(0), args_(nullptr)
   {
     if (!Annotation.empty())
       std::memcpy(annotation, Annotation.data(), annotationLength);
@@ -2150,8 +2164,10 @@ AnnotateAttr::AnnotateAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInf
 
 
 
+
+
 AnnotateAttr *AnnotateAttr::clone(ASTContext &C) const {
-  auto *A = new (C) AnnotateAttr(C, *this, getAnnotation());
+  auto *A = new (C) AnnotateAttr(C, *this, getAnnotation(), args_, args_Size);
   A->Inherited = Inherited;
   A->IsPackExpansion = IsPackExpansion;
   A->setImplicit(Implicit);
@@ -2164,15 +2180,36 @@ void AnnotateAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) co
     llvm_unreachable("Unknown attribute spelling!");
     break;
   case 0 : {
-    OS << " __attribute__((annotate(\"" << getAnnotation() << "\")))";
+    OS << " __attribute__((annotate(\"" << getAnnotation() << "\", ";
+  bool isFirst = true;
+  for (const auto &Val : args()) {
+    if (isFirst) isFirst = false;
+    else OS << ", ";
+    OS << Val;
+  }
+  OS << ")))";
     break;
   }
   case 1 : {
-    OS << " [[clang::annotate(\"" << getAnnotation() << "\")]]";
+    OS << " [[clang::annotate(\"" << getAnnotation() << "\", ";
+  bool isFirst = true;
+  for (const auto &Val : args()) {
+    if (isFirst) isFirst = false;
+    else OS << ", ";
+    OS << Val;
+  }
+  OS << ")]]";
     break;
   }
   case 2 : {
-    OS << " [[clang::annotate(\"" << getAnnotation() << "\")]]";
+    OS << " [[clang::annotate(\"" << getAnnotation() << "\", ";
+  bool isFirst = true;
+  for (const auto &Val : args()) {
+    if (isFirst) isFirst = false;
+    else OS << ", ";
+    OS << Val;
+  }
+  OS << ")]]";
     break;
   }
 }
@@ -9684,6 +9721,76 @@ const char *LifetimeBoundAttr::getSpelling() const {
 }
 
 
+// LikelyAttr implementation
+
+LikelyAttr *LikelyAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) LikelyAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+LikelyAttr *LikelyAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) LikelyAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+LikelyAttr *LikelyAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+LikelyAttr *LikelyAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+LikelyAttr::LikelyAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : StmtAttr(Ctx, CommonInfo, attr::Likely, false)
+  {
+}
+
+LikelyAttr *LikelyAttr::clone(ASTContext &C) const {
+  auto *A = new (C) LikelyAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void LikelyAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " [[likely]]";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::likely]]";
+    break;
+  }
+}
+}
+
+const char *LikelyAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "likely";
+  case 1:
+    return "likely";
+  }
+}
+
+
 // LoaderUninitializedAttr implementation
 
 LoaderUninitializedAttr *LoaderUninitializedAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
@@ -11685,6 +11792,74 @@ const char *NSConsumesSelfAttr::getSpelling() const {
     return "ns_consumes_self";
   case 2:
     return "ns_consumes_self";
+  }
+}
+
+
+// NSErrorDomainAttr implementation
+
+NSErrorDomainAttr *NSErrorDomainAttr::CreateImplicit(ASTContext &Ctx, VarDecl * ErrorDomain, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) NSErrorDomainAttr(Ctx, CommonInfo, ErrorDomain);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+NSErrorDomainAttr *NSErrorDomainAttr::Create(ASTContext &Ctx, VarDecl * ErrorDomain, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) NSErrorDomainAttr(Ctx, CommonInfo, ErrorDomain);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+NSErrorDomainAttr *NSErrorDomainAttr::CreateImplicit(ASTContext &Ctx, VarDecl * ErrorDomain, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, ErrorDomain, I);
+}
+
+NSErrorDomainAttr *NSErrorDomainAttr::Create(ASTContext &Ctx, VarDecl * ErrorDomain, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, ErrorDomain, I);
+}
+
+NSErrorDomainAttr::NSErrorDomainAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , VarDecl * ErrorDomain
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::NSErrorDomain, false, false)
+              , errorDomain(ErrorDomain)
+  {
+}
+
+
+
+NSErrorDomainAttr *NSErrorDomainAttr::clone(ASTContext &C) const {
+  auto *A = new (C) NSErrorDomainAttr(C, *this, errorDomain);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void NSErrorDomainAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((ns_error_domain(" << getErrorDomain()->getName() << ")))";
+    break;
+  }
+}
+}
+
+const char *NSErrorDomainAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "ns_error_domain";
   }
 }
 
@@ -14186,38 +14361,40 @@ const char *OMPDeclareSimdDeclAttr::getSpelling() const {
 
 // OMPDeclareTargetDeclAttr implementation
 
-OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::CreateImplicit(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, const AttributeCommonInfo &CommonInfo) {
-  auto *A = new (Ctx) OMPDeclareTargetDeclAttr(Ctx, CommonInfo, MapType, DevType);
+OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::CreateImplicit(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, unsigned Level, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) OMPDeclareTargetDeclAttr(Ctx, CommonInfo, MapType, DevType, Level);
   A->setImplicit(true);
   if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
     A->setAttributeSpellingListIndex(0);
   return A;
 }
 
-OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::Create(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, const AttributeCommonInfo &CommonInfo) {
-  auto *A = new (Ctx) OMPDeclareTargetDeclAttr(Ctx, CommonInfo, MapType, DevType);
+OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::Create(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, unsigned Level, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) OMPDeclareTargetDeclAttr(Ctx, CommonInfo, MapType, DevType, Level);
   if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
     A->setAttributeSpellingListIndex(0);
   return A;
 }
 
-OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::CreateImplicit(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::CreateImplicit(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, unsigned Level, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
   AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
-  return CreateImplicit(Ctx, MapType, DevType, I);
+  return CreateImplicit(Ctx, MapType, DevType, Level, I);
 }
 
-OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::Create(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::Create(ASTContext &Ctx, MapTypeTy MapType, DevTypeTy DevType, unsigned Level, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
   AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
-  return Create(Ctx, MapType, DevType, I);
+  return Create(Ctx, MapType, DevType, Level, I);
 }
 
 OMPDeclareTargetDeclAttr::OMPDeclareTargetDeclAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
               , MapTypeTy MapType
               , DevTypeTy DevType
+              , unsigned Level
              )
   : InheritableAttr(Ctx, CommonInfo, attr::OMPDeclareTargetDecl, false, false)
               , mapType(MapType)
               , devType(DevType)
+              , level(Level)
   {
 }
 
@@ -14265,8 +14442,10 @@ const char *OMPDeclareTargetDeclAttr::ConvertDevTypeTyToStr(DevTypeTy Val) {
   }
   llvm_unreachable("No enumerator with that value");
 }
+
+
 OMPDeclareTargetDeclAttr *OMPDeclareTargetDeclAttr::clone(ASTContext &C) const {
-  auto *A = new (C) OMPDeclareTargetDeclAttr(C, *this, mapType, devType);
+  auto *A = new (C) OMPDeclareTargetDeclAttr(C, *this, mapType, devType, level);
   A->Inherited = Inherited;
   A->IsPackExpansion = IsPackExpansion;
   A->setImplicit(Implicit);
@@ -16327,6 +16506,82 @@ const char *ObjCNonLazyClassAttr::getSpelling() const {
 }
 
 
+// ObjCNonRuntimeProtocolAttr implementation
+
+ObjCNonRuntimeProtocolAttr *ObjCNonRuntimeProtocolAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) ObjCNonRuntimeProtocolAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+ObjCNonRuntimeProtocolAttr *ObjCNonRuntimeProtocolAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) ObjCNonRuntimeProtocolAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+ObjCNonRuntimeProtocolAttr *ObjCNonRuntimeProtocolAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+ObjCNonRuntimeProtocolAttr *ObjCNonRuntimeProtocolAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+ObjCNonRuntimeProtocolAttr::ObjCNonRuntimeProtocolAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : Attr(Ctx, CommonInfo, attr::ObjCNonRuntimeProtocol, false)
+  {
+}
+
+ObjCNonRuntimeProtocolAttr *ObjCNonRuntimeProtocolAttr::clone(ASTContext &C) const {
+  auto *A = new (C) ObjCNonRuntimeProtocolAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void ObjCNonRuntimeProtocolAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((objc_non_runtime_protocol))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::objc_non_runtime_protocol]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::objc_non_runtime_protocol]]";
+    break;
+  }
+}
+}
+
+const char *ObjCNonRuntimeProtocolAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "objc_non_runtime_protocol";
+  case 1:
+    return "objc_non_runtime_protocol";
+  case 2:
+    return "objc_non_runtime_protocol";
+  }
+}
+
+
 // ObjCOwnershipAttr implementation
 
 ObjCOwnershipAttr *ObjCOwnershipAttr::CreateImplicit(ASTContext &Ctx, IdentifierInfo * Kind, const AttributeCommonInfo &CommonInfo) {
@@ -17408,6 +17663,158 @@ const char *OpenCLGlobalAddressSpaceAttr::getSpelling() const {
     return "opencl_global";
   case 4:
     return "opencl_global";
+  }
+}
+
+
+// OpenCLGlobalDeviceAddressSpaceAttr implementation
+
+OpenCLGlobalDeviceAddressSpaceAttr *OpenCLGlobalDeviceAddressSpaceAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) OpenCLGlobalDeviceAddressSpaceAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+OpenCLGlobalDeviceAddressSpaceAttr *OpenCLGlobalDeviceAddressSpaceAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) OpenCLGlobalDeviceAddressSpaceAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+OpenCLGlobalDeviceAddressSpaceAttr *OpenCLGlobalDeviceAddressSpaceAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+OpenCLGlobalDeviceAddressSpaceAttr *OpenCLGlobalDeviceAddressSpaceAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+OpenCLGlobalDeviceAddressSpaceAttr::OpenCLGlobalDeviceAddressSpaceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : TypeAttr(Ctx, CommonInfo, attr::OpenCLGlobalDeviceAddressSpace, false)
+  {
+}
+
+OpenCLGlobalDeviceAddressSpaceAttr *OpenCLGlobalDeviceAddressSpaceAttr::clone(ASTContext &C) const {
+  auto *A = new (C) OpenCLGlobalDeviceAddressSpaceAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void OpenCLGlobalDeviceAddressSpaceAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((opencl_global_device))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::opencl_global_device]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::opencl_global_device]]";
+    break;
+  }
+}
+}
+
+const char *OpenCLGlobalDeviceAddressSpaceAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "opencl_global_device";
+  case 1:
+    return "opencl_global_device";
+  case 2:
+    return "opencl_global_device";
+  }
+}
+
+
+// OpenCLGlobalHostAddressSpaceAttr implementation
+
+OpenCLGlobalHostAddressSpaceAttr *OpenCLGlobalHostAddressSpaceAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) OpenCLGlobalHostAddressSpaceAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+OpenCLGlobalHostAddressSpaceAttr *OpenCLGlobalHostAddressSpaceAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) OpenCLGlobalHostAddressSpaceAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+OpenCLGlobalHostAddressSpaceAttr *OpenCLGlobalHostAddressSpaceAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+OpenCLGlobalHostAddressSpaceAttr *OpenCLGlobalHostAddressSpaceAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+OpenCLGlobalHostAddressSpaceAttr::OpenCLGlobalHostAddressSpaceAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : TypeAttr(Ctx, CommonInfo, attr::OpenCLGlobalHostAddressSpace, false)
+  {
+}
+
+OpenCLGlobalHostAddressSpaceAttr *OpenCLGlobalHostAddressSpaceAttr::clone(ASTContext &C) const {
+  auto *A = new (C) OpenCLGlobalHostAddressSpaceAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void OpenCLGlobalHostAddressSpaceAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((opencl_global_host))";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::opencl_global_host]]";
+    break;
+  }
+  case 2 : {
+    OS << " [[clang::opencl_global_host]]";
+    break;
+  }
+}
+}
+
+const char *OpenCLGlobalHostAddressSpaceAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "opencl_global_host";
+  case 1:
+    return "opencl_global_host";
+  case 2:
+    return "opencl_global_host";
   }
 }
 
@@ -21751,6 +22158,55 @@ const char *StdCallAttr::getSpelling() const {
 }
 
 
+// StrictFPAttr implementation
+
+StrictFPAttr *StrictFPAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) StrictFPAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+StrictFPAttr *StrictFPAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) StrictFPAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+StrictFPAttr *StrictFPAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+StrictFPAttr *StrictFPAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+StrictFPAttr::StrictFPAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::StrictFP, false, false)
+  {
+}
+
+StrictFPAttr *StrictFPAttr::clone(ASTContext &C) const {
+  auto *A = new (C) StrictFPAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void StrictFPAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+}
+
+const char *StrictFPAttr::getSpelling() const {
+  return "(No spelling)";
+}
+
+
 // SuppressAttr implementation
 
 SuppressAttr *SuppressAttr::CreateImplicit(ASTContext &Ctx, StringRef *DiagnosticIdentifiers, unsigned DiagnosticIdentifiersSize, const AttributeCommonInfo &CommonInfo) {
@@ -21838,6 +22294,140 @@ const char *SuppressAttr::getSpelling() const {
     return "(No spelling)";
   case 0:
     return "suppress";
+  }
+}
+
+
+// SwiftBridgeAttr implementation
+
+SwiftBridgeAttr *SwiftBridgeAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef SwiftType, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftBridgeAttr(Ctx, CommonInfo, SwiftType);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftBridgeAttr *SwiftBridgeAttr::Create(ASTContext &Ctx, llvm::StringRef SwiftType, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftBridgeAttr(Ctx, CommonInfo, SwiftType);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftBridgeAttr *SwiftBridgeAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef SwiftType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, SwiftType, I);
+}
+
+SwiftBridgeAttr *SwiftBridgeAttr::Create(ASTContext &Ctx, llvm::StringRef SwiftType, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, SwiftType, I);
+}
+
+SwiftBridgeAttr::SwiftBridgeAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef SwiftType
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::SwiftBridge, false, false)
+              , swiftTypeLength(SwiftType.size()),swiftType(new (Ctx, 1) char[swiftTypeLength])
+  {
+    if (!SwiftType.empty())
+      std::memcpy(swiftType, SwiftType.data(), swiftTypeLength);
+}
+
+
+
+SwiftBridgeAttr *SwiftBridgeAttr::clone(ASTContext &C) const {
+  auto *A = new (C) SwiftBridgeAttr(C, *this, getSwiftType());
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void SwiftBridgeAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((swift_bridge(\"" << getSwiftType() << "\")))";
+    break;
+  }
+}
+}
+
+const char *SwiftBridgeAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "swift_bridge";
+  }
+}
+
+
+// SwiftBridgedTypedefAttr implementation
+
+SwiftBridgedTypedefAttr *SwiftBridgedTypedefAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftBridgedTypedefAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftBridgedTypedefAttr *SwiftBridgedTypedefAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftBridgedTypedefAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftBridgedTypedefAttr *SwiftBridgedTypedefAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+SwiftBridgedTypedefAttr *SwiftBridgedTypedefAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+SwiftBridgedTypedefAttr::SwiftBridgedTypedefAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::SwiftBridgedTypedef, false, false)
+  {
+}
+
+SwiftBridgedTypedefAttr *SwiftBridgedTypedefAttr::clone(ASTContext &C) const {
+  auto *A = new (C) SwiftBridgedTypedefAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void SwiftBridgedTypedefAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((swift_bridged_typedef))";
+    break;
+  }
+}
+}
+
+const char *SwiftBridgedTypedefAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "swift_bridged_typedef";
   }
 }
 
@@ -21994,6 +22584,99 @@ const char *SwiftContextAttr::getSpelling() const {
 }
 
 
+// SwiftErrorAttr implementation
+
+SwiftErrorAttr *SwiftErrorAttr::CreateImplicit(ASTContext &Ctx, ConventionKind Convention, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftErrorAttr(Ctx, CommonInfo, Convention);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftErrorAttr *SwiftErrorAttr::Create(ASTContext &Ctx, ConventionKind Convention, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftErrorAttr(Ctx, CommonInfo, Convention);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftErrorAttr *SwiftErrorAttr::CreateImplicit(ASTContext &Ctx, ConventionKind Convention, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, Convention, I);
+}
+
+SwiftErrorAttr *SwiftErrorAttr::Create(ASTContext &Ctx, ConventionKind Convention, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, Convention, I);
+}
+
+SwiftErrorAttr::SwiftErrorAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , ConventionKind Convention
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::SwiftError, false, false)
+              , convention(Convention)
+  {
+}
+
+
+
+bool SwiftErrorAttr::ConvertStrToConventionKind(StringRef Val, ConventionKind &Out) {
+  Optional<ConventionKind> R = llvm::StringSwitch<Optional<ConventionKind>>(Val)
+    .Case("none", SwiftErrorAttr::None)
+    .Case("nonnull_error", SwiftErrorAttr::NonNullError)
+    .Case("null_result", SwiftErrorAttr::NullResult)
+    .Case("zero_result", SwiftErrorAttr::ZeroResult)
+    .Case("nonzero_result", SwiftErrorAttr::NonZeroResult)
+    .Default(Optional<ConventionKind>());
+  if (R) {
+    Out = *R;
+      return true;
+    }
+  return false;
+}
+
+const char *SwiftErrorAttr::ConvertConventionKindToStr(ConventionKind Val) {
+  switch(Val) {
+  case SwiftErrorAttr::None: return "none";
+  case SwiftErrorAttr::NonNullError: return "nonnull_error";
+  case SwiftErrorAttr::NullResult: return "null_result";
+  case SwiftErrorAttr::ZeroResult: return "zero_result";
+  case SwiftErrorAttr::NonZeroResult: return "nonzero_result";
+  }
+  llvm_unreachable("No enumerator with that value");
+}
+SwiftErrorAttr *SwiftErrorAttr::clone(ASTContext &C) const {
+  auto *A = new (C) SwiftErrorAttr(C, *this, convention);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void SwiftErrorAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((swift_error(\"" << SwiftErrorAttr::ConvertConventionKindToStr(getConvention()) << "\")))";
+    break;
+  }
+}
+}
+
+const char *SwiftErrorAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "swift_error";
+  }
+}
+
+
 // SwiftErrorResultAttr implementation
 
 SwiftErrorResultAttr *SwiftErrorResultAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
@@ -22142,6 +22825,302 @@ const char *SwiftIndirectResultAttr::getSpelling() const {
     return "swift_indirect_result";
   case 2:
     return "swift_indirect_result";
+  }
+}
+
+
+// SwiftNameAttr implementation
+
+SwiftNameAttr *SwiftNameAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Name, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftNameAttr(Ctx, CommonInfo, Name);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftNameAttr *SwiftNameAttr::Create(ASTContext &Ctx, llvm::StringRef Name, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftNameAttr(Ctx, CommonInfo, Name);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftNameAttr *SwiftNameAttr::CreateImplicit(ASTContext &Ctx, llvm::StringRef Name, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, Name, I);
+}
+
+SwiftNameAttr *SwiftNameAttr::Create(ASTContext &Ctx, llvm::StringRef Name, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, Name, I);
+}
+
+SwiftNameAttr::SwiftNameAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , llvm::StringRef Name
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::SwiftName, false, false)
+              , nameLength(Name.size()),name(new (Ctx, 1) char[nameLength])
+  {
+    if (!Name.empty())
+      std::memcpy(name, Name.data(), nameLength);
+}
+
+
+
+SwiftNameAttr *SwiftNameAttr::clone(ASTContext &C) const {
+  auto *A = new (C) SwiftNameAttr(C, *this, getName());
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void SwiftNameAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((swift_name(\"" << getName() << "\")))";
+    break;
+  }
+}
+}
+
+const char *SwiftNameAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "swift_name";
+  }
+}
+
+
+// SwiftNewTypeAttr implementation
+
+SwiftNewTypeAttr *SwiftNewTypeAttr::CreateImplicit(ASTContext &Ctx, NewtypeKind NewtypeKind, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftNewTypeAttr(Ctx, CommonInfo, NewtypeKind);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftNewTypeAttr *SwiftNewTypeAttr::Create(ASTContext &Ctx, NewtypeKind NewtypeKind, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftNewTypeAttr(Ctx, CommonInfo, NewtypeKind);
+  return A;
+}
+
+SwiftNewTypeAttr *SwiftNewTypeAttr::CreateImplicit(ASTContext &Ctx, NewtypeKind NewtypeKind, SourceRange Range, AttributeCommonInfo::Syntax Syntax, SwiftNewTypeAttr::Spelling S) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
+  return CreateImplicit(Ctx, NewtypeKind, I);
+}
+
+SwiftNewTypeAttr *SwiftNewTypeAttr::Create(ASTContext &Ctx, NewtypeKind NewtypeKind, SourceRange Range, AttributeCommonInfo::Syntax Syntax, SwiftNewTypeAttr::Spelling S) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax, S);
+  return Create(Ctx, NewtypeKind, I);
+}
+
+SwiftNewTypeAttr::SwiftNewTypeAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+              , NewtypeKind NewtypeKind
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::SwiftNewType, false, false)
+              , newtypeKind(NewtypeKind)
+  {
+}
+
+SwiftNewTypeAttr::Spelling SwiftNewTypeAttr::getSemanticSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+    default: llvm_unreachable("Unknown spelling list index");
+    case 0: return GNU_swift_newtype;
+    case 1: return GNU_swift_wrapper;
+  }
+}
+
+
+bool SwiftNewTypeAttr::ConvertStrToNewtypeKind(StringRef Val, NewtypeKind &Out) {
+  Optional<NewtypeKind> R = llvm::StringSwitch<Optional<NewtypeKind>>(Val)
+    .Case("struct", SwiftNewTypeAttr::NK_Struct)
+    .Case("enum", SwiftNewTypeAttr::NK_Enum)
+    .Default(Optional<NewtypeKind>());
+  if (R) {
+    Out = *R;
+      return true;
+    }
+  return false;
+}
+
+const char *SwiftNewTypeAttr::ConvertNewtypeKindToStr(NewtypeKind Val) {
+  switch(Val) {
+  case SwiftNewTypeAttr::NK_Struct: return "struct";
+  case SwiftNewTypeAttr::NK_Enum: return "enum";
+  }
+  llvm_unreachable("No enumerator with that value");
+}
+SwiftNewTypeAttr *SwiftNewTypeAttr::clone(ASTContext &C) const {
+  auto *A = new (C) SwiftNewTypeAttr(C, *this, newtypeKind);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void SwiftNewTypeAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((swift_newtype(\"" << SwiftNewTypeAttr::ConvertNewtypeKindToStr(getNewtypeKind()) << "\")))";
+    break;
+  }
+  case 1 : {
+    OS << " __attribute__((swift_wrapper(\"" << SwiftNewTypeAttr::ConvertNewtypeKindToStr(getNewtypeKind()) << "\")))";
+    break;
+  }
+}
+}
+
+const char *SwiftNewTypeAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "swift_newtype";
+  case 1:
+    return "swift_wrapper";
+  }
+}
+
+
+// SwiftObjCMembersAttr implementation
+
+SwiftObjCMembersAttr *SwiftObjCMembersAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftObjCMembersAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftObjCMembersAttr *SwiftObjCMembersAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftObjCMembersAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftObjCMembersAttr *SwiftObjCMembersAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+SwiftObjCMembersAttr *SwiftObjCMembersAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+SwiftObjCMembersAttr::SwiftObjCMembersAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : Attr(Ctx, CommonInfo, attr::SwiftObjCMembers, false)
+  {
+}
+
+SwiftObjCMembersAttr *SwiftObjCMembersAttr::clone(ASTContext &C) const {
+  auto *A = new (C) SwiftObjCMembersAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void SwiftObjCMembersAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((swift_objc_members))";
+    break;
+  }
+}
+}
+
+const char *SwiftObjCMembersAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "swift_objc_members";
+  }
+}
+
+
+// SwiftPrivateAttr implementation
+
+SwiftPrivateAttr *SwiftPrivateAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftPrivateAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftPrivateAttr *SwiftPrivateAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) SwiftPrivateAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+SwiftPrivateAttr *SwiftPrivateAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+SwiftPrivateAttr *SwiftPrivateAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+SwiftPrivateAttr::SwiftPrivateAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : InheritableAttr(Ctx, CommonInfo, attr::SwiftPrivate, false, false)
+  {
+}
+
+SwiftPrivateAttr *SwiftPrivateAttr::clone(ASTContext &C) const {
+  auto *A = new (C) SwiftPrivateAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void SwiftPrivateAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " __attribute__((swift_private))";
+    break;
+  }
+}
+}
+
+const char *SwiftPrivateAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "swift_private";
   }
 }
 
@@ -23558,6 +24537,76 @@ const char *UninitializedAttr::getSpelling() const {
     return "uninitialized";
   case 1:
     return "uninitialized";
+  }
+}
+
+
+// UnlikelyAttr implementation
+
+UnlikelyAttr *UnlikelyAttr::CreateImplicit(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) UnlikelyAttr(Ctx, CommonInfo);
+  A->setImplicit(true);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+UnlikelyAttr *UnlikelyAttr::Create(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo) {
+  auto *A = new (Ctx) UnlikelyAttr(Ctx, CommonInfo);
+  if (!A->isAttributeSpellingListCalculated() && !A->getAttrName())
+    A->setAttributeSpellingListIndex(0);
+  return A;
+}
+
+UnlikelyAttr *UnlikelyAttr::CreateImplicit(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return CreateImplicit(Ctx, I);
+}
+
+UnlikelyAttr *UnlikelyAttr::Create(ASTContext &Ctx, SourceRange Range, AttributeCommonInfo::Syntax Syntax) {
+  AttributeCommonInfo I(Range, NoSemaHandlerAttribute, Syntax);
+  return Create(Ctx, I);
+}
+
+UnlikelyAttr::UnlikelyAttr(ASTContext &Ctx, const AttributeCommonInfo &CommonInfo
+             )
+  : StmtAttr(Ctx, CommonInfo, attr::Unlikely, false)
+  {
+}
+
+UnlikelyAttr *UnlikelyAttr::clone(ASTContext &C) const {
+  auto *A = new (C) UnlikelyAttr(C, *this);
+  A->Inherited = Inherited;
+  A->IsPackExpansion = IsPackExpansion;
+  A->setImplicit(Implicit);
+  return A;
+}
+
+void UnlikelyAttr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    break;
+  case 0 : {
+    OS << " [[unlikely]]";
+    break;
+  }
+  case 1 : {
+    OS << " [[clang::unlikely]]";
+    break;
+  }
+}
+}
+
+const char *UnlikelyAttr::getSpelling() const {
+  switch (getAttributeSpellingListIndex()) {
+  default:
+    llvm_unreachable("Unknown attribute spelling!");
+    return "(No spelling)";
+  case 0:
+    return "unlikely";
+  case 1:
+    return "unlikely";
   }
 }
 
@@ -25505,6 +26554,8 @@ const char *Attr::getSpelling() const {
     return cast<LayoutVersionAttr>(this)->getSpelling();
   case attr::LifetimeBound:
     return cast<LifetimeBoundAttr>(this)->getSpelling();
+  case attr::Likely:
+    return cast<LikelyAttr>(this)->getSpelling();
   case attr::LoaderUninitialized:
     return cast<LoaderUninitializedAttr>(this)->getSpelling();
   case attr::LockReturned:
@@ -25553,6 +26604,8 @@ const char *Attr::getSpelling() const {
     return cast<NSConsumedAttr>(this)->getSpelling();
   case attr::NSConsumesSelf:
     return cast<NSConsumesSelfAttr>(this)->getSpelling();
+  case attr::NSErrorDomain:
+    return cast<NSErrorDomainAttr>(this)->getSpelling();
   case attr::NSReturnsAutoreleased:
     return cast<NSReturnsAutoreleasedAttr>(this)->getSpelling();
   case attr::NSReturnsNotRetained:
@@ -25671,6 +26724,8 @@ const char *Attr::getSpelling() const {
     return cast<ObjCNSObjectAttr>(this)->getSpelling();
   case attr::ObjCNonLazyClass:
     return cast<ObjCNonLazyClassAttr>(this)->getSpelling();
+  case attr::ObjCNonRuntimeProtocol:
+    return cast<ObjCNonRuntimeProtocolAttr>(this)->getSpelling();
   case attr::ObjCOwnership:
     return cast<ObjCOwnershipAttr>(this)->getSpelling();
   case attr::ObjCPreciseLifetime:
@@ -25697,6 +26752,10 @@ const char *Attr::getSpelling() const {
     return cast<OpenCLGenericAddressSpaceAttr>(this)->getSpelling();
   case attr::OpenCLGlobalAddressSpace:
     return cast<OpenCLGlobalAddressSpaceAttr>(this)->getSpelling();
+  case attr::OpenCLGlobalDeviceAddressSpace:
+    return cast<OpenCLGlobalDeviceAddressSpaceAttr>(this)->getSpelling();
+  case attr::OpenCLGlobalHostAddressSpace:
+    return cast<OpenCLGlobalHostAddressSpaceAttr>(this)->getSpelling();
   case attr::OpenCLIntelReqdSubGroupSize:
     return cast<OpenCLIntelReqdSubGroupSizeAttr>(this)->getSpelling();
   case attr::OpenCLKernel:
@@ -25799,16 +26858,32 @@ const char *Attr::getSpelling() const {
     return cast<SpeculativeLoadHardeningAttr>(this)->getSpelling();
   case attr::StdCall:
     return cast<StdCallAttr>(this)->getSpelling();
+  case attr::StrictFP:
+    return cast<StrictFPAttr>(this)->getSpelling();
   case attr::Suppress:
     return cast<SuppressAttr>(this)->getSpelling();
+  case attr::SwiftBridge:
+    return cast<SwiftBridgeAttr>(this)->getSpelling();
+  case attr::SwiftBridgedTypedef:
+    return cast<SwiftBridgedTypedefAttr>(this)->getSpelling();
   case attr::SwiftCall:
     return cast<SwiftCallAttr>(this)->getSpelling();
   case attr::SwiftContext:
     return cast<SwiftContextAttr>(this)->getSpelling();
+  case attr::SwiftError:
+    return cast<SwiftErrorAttr>(this)->getSpelling();
   case attr::SwiftErrorResult:
     return cast<SwiftErrorResultAttr>(this)->getSpelling();
   case attr::SwiftIndirectResult:
     return cast<SwiftIndirectResultAttr>(this)->getSpelling();
+  case attr::SwiftName:
+    return cast<SwiftNameAttr>(this)->getSpelling();
+  case attr::SwiftNewType:
+    return cast<SwiftNewTypeAttr>(this)->getSpelling();
+  case attr::SwiftObjCMembers:
+    return cast<SwiftObjCMembersAttr>(this)->getSpelling();
+  case attr::SwiftPrivate:
+    return cast<SwiftPrivateAttr>(this)->getSpelling();
   case attr::SysVABI:
     return cast<SysVABIAttr>(this)->getSpelling();
   case attr::TLSModel:
@@ -25843,6 +26918,8 @@ const char *Attr::getSpelling() const {
     return cast<UnavailableAttr>(this)->getSpelling();
   case attr::Uninitialized:
     return cast<UninitializedAttr>(this)->getSpelling();
+  case attr::Unlikely:
+    return cast<UnlikelyAttr>(this)->getSpelling();
   case attr::Unused:
     return cast<UnusedAttr>(this)->getSpelling();
   case attr::UseHandle:
@@ -26119,6 +27196,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<LayoutVersionAttr>(this)->clone(C);
   case attr::LifetimeBound:
     return cast<LifetimeBoundAttr>(this)->clone(C);
+  case attr::Likely:
+    return cast<LikelyAttr>(this)->clone(C);
   case attr::LoaderUninitialized:
     return cast<LoaderUninitializedAttr>(this)->clone(C);
   case attr::LockReturned:
@@ -26167,6 +27246,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<NSConsumedAttr>(this)->clone(C);
   case attr::NSConsumesSelf:
     return cast<NSConsumesSelfAttr>(this)->clone(C);
+  case attr::NSErrorDomain:
+    return cast<NSErrorDomainAttr>(this)->clone(C);
   case attr::NSReturnsAutoreleased:
     return cast<NSReturnsAutoreleasedAttr>(this)->clone(C);
   case attr::NSReturnsNotRetained:
@@ -26285,6 +27366,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<ObjCNSObjectAttr>(this)->clone(C);
   case attr::ObjCNonLazyClass:
     return cast<ObjCNonLazyClassAttr>(this)->clone(C);
+  case attr::ObjCNonRuntimeProtocol:
+    return cast<ObjCNonRuntimeProtocolAttr>(this)->clone(C);
   case attr::ObjCOwnership:
     return cast<ObjCOwnershipAttr>(this)->clone(C);
   case attr::ObjCPreciseLifetime:
@@ -26311,6 +27394,10 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<OpenCLGenericAddressSpaceAttr>(this)->clone(C);
   case attr::OpenCLGlobalAddressSpace:
     return cast<OpenCLGlobalAddressSpaceAttr>(this)->clone(C);
+  case attr::OpenCLGlobalDeviceAddressSpace:
+    return cast<OpenCLGlobalDeviceAddressSpaceAttr>(this)->clone(C);
+  case attr::OpenCLGlobalHostAddressSpace:
+    return cast<OpenCLGlobalHostAddressSpaceAttr>(this)->clone(C);
   case attr::OpenCLIntelReqdSubGroupSize:
     return cast<OpenCLIntelReqdSubGroupSizeAttr>(this)->clone(C);
   case attr::OpenCLKernel:
@@ -26413,16 +27500,32 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<SpeculativeLoadHardeningAttr>(this)->clone(C);
   case attr::StdCall:
     return cast<StdCallAttr>(this)->clone(C);
+  case attr::StrictFP:
+    return cast<StrictFPAttr>(this)->clone(C);
   case attr::Suppress:
     return cast<SuppressAttr>(this)->clone(C);
+  case attr::SwiftBridge:
+    return cast<SwiftBridgeAttr>(this)->clone(C);
+  case attr::SwiftBridgedTypedef:
+    return cast<SwiftBridgedTypedefAttr>(this)->clone(C);
   case attr::SwiftCall:
     return cast<SwiftCallAttr>(this)->clone(C);
   case attr::SwiftContext:
     return cast<SwiftContextAttr>(this)->clone(C);
+  case attr::SwiftError:
+    return cast<SwiftErrorAttr>(this)->clone(C);
   case attr::SwiftErrorResult:
     return cast<SwiftErrorResultAttr>(this)->clone(C);
   case attr::SwiftIndirectResult:
     return cast<SwiftIndirectResultAttr>(this)->clone(C);
+  case attr::SwiftName:
+    return cast<SwiftNameAttr>(this)->clone(C);
+  case attr::SwiftNewType:
+    return cast<SwiftNewTypeAttr>(this)->clone(C);
+  case attr::SwiftObjCMembers:
+    return cast<SwiftObjCMembersAttr>(this)->clone(C);
+  case attr::SwiftPrivate:
+    return cast<SwiftPrivateAttr>(this)->clone(C);
   case attr::SysVABI:
     return cast<SysVABIAttr>(this)->clone(C);
   case attr::TLSModel:
@@ -26457,6 +27560,8 @@ Attr *Attr::clone(ASTContext &C) const {
     return cast<UnavailableAttr>(this)->clone(C);
   case attr::Uninitialized:
     return cast<UninitializedAttr>(this)->clone(C);
+  case attr::Unlikely:
+    return cast<UnlikelyAttr>(this)->clone(C);
   case attr::Unused:
     return cast<UnusedAttr>(this)->clone(C);
   case attr::UseHandle:
@@ -26733,6 +27838,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<LayoutVersionAttr>(this)->printPretty(OS, Policy);
   case attr::LifetimeBound:
     return cast<LifetimeBoundAttr>(this)->printPretty(OS, Policy);
+  case attr::Likely:
+    return cast<LikelyAttr>(this)->printPretty(OS, Policy);
   case attr::LoaderUninitialized:
     return cast<LoaderUninitializedAttr>(this)->printPretty(OS, Policy);
   case attr::LockReturned:
@@ -26781,6 +27888,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<NSConsumedAttr>(this)->printPretty(OS, Policy);
   case attr::NSConsumesSelf:
     return cast<NSConsumesSelfAttr>(this)->printPretty(OS, Policy);
+  case attr::NSErrorDomain:
+    return cast<NSErrorDomainAttr>(this)->printPretty(OS, Policy);
   case attr::NSReturnsAutoreleased:
     return cast<NSReturnsAutoreleasedAttr>(this)->printPretty(OS, Policy);
   case attr::NSReturnsNotRetained:
@@ -26899,6 +28008,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<ObjCNSObjectAttr>(this)->printPretty(OS, Policy);
   case attr::ObjCNonLazyClass:
     return cast<ObjCNonLazyClassAttr>(this)->printPretty(OS, Policy);
+  case attr::ObjCNonRuntimeProtocol:
+    return cast<ObjCNonRuntimeProtocolAttr>(this)->printPretty(OS, Policy);
   case attr::ObjCOwnership:
     return cast<ObjCOwnershipAttr>(this)->printPretty(OS, Policy);
   case attr::ObjCPreciseLifetime:
@@ -26925,6 +28036,10 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<OpenCLGenericAddressSpaceAttr>(this)->printPretty(OS, Policy);
   case attr::OpenCLGlobalAddressSpace:
     return cast<OpenCLGlobalAddressSpaceAttr>(this)->printPretty(OS, Policy);
+  case attr::OpenCLGlobalDeviceAddressSpace:
+    return cast<OpenCLGlobalDeviceAddressSpaceAttr>(this)->printPretty(OS, Policy);
+  case attr::OpenCLGlobalHostAddressSpace:
+    return cast<OpenCLGlobalHostAddressSpaceAttr>(this)->printPretty(OS, Policy);
   case attr::OpenCLIntelReqdSubGroupSize:
     return cast<OpenCLIntelReqdSubGroupSizeAttr>(this)->printPretty(OS, Policy);
   case attr::OpenCLKernel:
@@ -27027,16 +28142,32 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<SpeculativeLoadHardeningAttr>(this)->printPretty(OS, Policy);
   case attr::StdCall:
     return cast<StdCallAttr>(this)->printPretty(OS, Policy);
+  case attr::StrictFP:
+    return cast<StrictFPAttr>(this)->printPretty(OS, Policy);
   case attr::Suppress:
     return cast<SuppressAttr>(this)->printPretty(OS, Policy);
+  case attr::SwiftBridge:
+    return cast<SwiftBridgeAttr>(this)->printPretty(OS, Policy);
+  case attr::SwiftBridgedTypedef:
+    return cast<SwiftBridgedTypedefAttr>(this)->printPretty(OS, Policy);
   case attr::SwiftCall:
     return cast<SwiftCallAttr>(this)->printPretty(OS, Policy);
   case attr::SwiftContext:
     return cast<SwiftContextAttr>(this)->printPretty(OS, Policy);
+  case attr::SwiftError:
+    return cast<SwiftErrorAttr>(this)->printPretty(OS, Policy);
   case attr::SwiftErrorResult:
     return cast<SwiftErrorResultAttr>(this)->printPretty(OS, Policy);
   case attr::SwiftIndirectResult:
     return cast<SwiftIndirectResultAttr>(this)->printPretty(OS, Policy);
+  case attr::SwiftName:
+    return cast<SwiftNameAttr>(this)->printPretty(OS, Policy);
+  case attr::SwiftNewType:
+    return cast<SwiftNewTypeAttr>(this)->printPretty(OS, Policy);
+  case attr::SwiftObjCMembers:
+    return cast<SwiftObjCMembersAttr>(this)->printPretty(OS, Policy);
+  case attr::SwiftPrivate:
+    return cast<SwiftPrivateAttr>(this)->printPretty(OS, Policy);
   case attr::SysVABI:
     return cast<SysVABIAttr>(this)->printPretty(OS, Policy);
   case attr::TLSModel:
@@ -27071,6 +28202,8 @@ void Attr::printPretty(raw_ostream &OS, const PrintingPolicy &Policy) const {
     return cast<UnavailableAttr>(this)->printPretty(OS, Policy);
   case attr::Uninitialized:
     return cast<UninitializedAttr>(this)->printPretty(OS, Policy);
+  case attr::Unlikely:
+    return cast<UnlikelyAttr>(this)->printPretty(OS, Policy);
   case attr::Unused:
     return cast<UnusedAttr>(this)->printPretty(OS, Policy);
   case attr::UseHandle:

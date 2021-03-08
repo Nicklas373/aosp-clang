@@ -40,10 +40,6 @@ enum TraversalKind {
   /// Will traverse all child nodes.
   TK_AsIs,
 
-  /// Will not traverse implicit casts and parentheses.
-  /// Corresponds to Expr::IgnoreParenImpCasts()
-  TK_IgnoreImplicitCastsAndParentheses,
-
   /// Ignore AST nodes not written in the source
   TK_IgnoreUnlessSpelledInSource
 };
@@ -132,6 +128,7 @@ private:
   enum NodeKindId {
     NKI_None,
     NKI_TemplateArgument,
+    NKI_TemplateArgumentLoc,
     NKI_TemplateName,
     NKI_NestedNameSpecifierLoc,
     NKI_QualType,
@@ -191,6 +188,7 @@ private:
   };
 KIND_TO_KIND_ID(CXXCtorInitializer)
 KIND_TO_KIND_ID(TemplateArgument)
+KIND_TO_KIND_ID(TemplateArgumentLoc)
 KIND_TO_KIND_ID(TemplateName)
 KIND_TO_KIND_ID(NestedNameSpecifier)
 KIND_TO_KIND_ID(NestedNameSpecifierLoc)
@@ -456,12 +454,13 @@ private:
   /// Note that we can store \c Decls, \c Stmts, \c Types,
   /// \c NestedNameSpecifiers and \c CXXCtorInitializer by pointer as they are
   /// guaranteed to be unique pointers pointing to dedicated storage in the AST.
-  /// \c QualTypes, \c NestedNameSpecifierLocs, \c TypeLocs and
-  /// \c TemplateArguments on the other hand do not have storage or unique
-  /// pointers and thus need to be stored by value.
+  /// \c QualTypes, \c NestedNameSpecifierLocs, \c TypeLocs,
+  /// \c TemplateArguments and \c TemplateArgumentLocs on the other hand do not
+  /// have storage or unique pointers and thus need to be stored by value.
   llvm::AlignedCharArrayUnion<const void *, TemplateArgument,
-                              NestedNameSpecifierLoc, QualType,
-                              TypeLoc> Storage;
+                              TemplateArgumentLoc, NestedNameSpecifierLoc,
+                              QualType, TypeLoc>
+      Storage;
 };
 
 template <typename T>
@@ -495,6 +494,10 @@ struct DynTypedNode::BaseConverter<
 template <>
 struct DynTypedNode::BaseConverter<
     TemplateArgument, void> : public ValueConverter<TemplateArgument> {};
+
+template <>
+struct DynTypedNode::BaseConverter<TemplateArgumentLoc, void>
+    : public ValueConverter<TemplateArgumentLoc> {};
 
 template <>
 struct DynTypedNode::BaseConverter<
@@ -535,8 +538,6 @@ using ASTNodeKind = ::clang::ASTNodeKind;
 using TraversalKind = ::clang::TraversalKind;
 
 constexpr TraversalKind TK_AsIs = ::clang::TK_AsIs;
-constexpr TraversalKind TK_IgnoreImplicitCastsAndParentheses =
-    ::clang::TK_IgnoreImplicitCastsAndParentheses;
 constexpr TraversalKind TK_IgnoreUnlessSpelledInSource =
     ::clang::TK_IgnoreUnlessSpelledInSource;
 } // namespace ast_type_traits

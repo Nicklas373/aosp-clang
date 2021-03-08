@@ -21,32 +21,34 @@ def OpenACC : DirectiveLanguage {
   let cppNamespace = "acc"; // final namespace will be llvm::acc
   let directivePrefix = "ACCD_";
   let clausePrefix = "ACCC_";
-  let makeEnumAvailableInNamespace = 1;
-  let enableBitmaskEnumInNamespace = 1;
+  let makeEnumAvailableInNamespace = true;
+  let enableBitmaskEnumInNamespace = true;
   let includeHeader = "llvm/Frontend/OpenACC/ACC.h.inc";
   let clauseEnumSetClass = "AccClauseSet";
+  let flangClauseBaseClass = "AccClause";
 }
 
 //===----------------------------------------------------------------------===//
 // Definition of OpenACC clauses
 //===----------------------------------------------------------------------===//
 
+// 2.16.1
+def ACCC_Async : Clause<"async"> {
+  let flangClassValue = "ScalarIntExpr";
+  let isValueOptional = true;
+}
+
 // 2.9.6
 def ACCC_Auto : Clause<"auto"> {}
 
-// 2.16.1
-def ACCC_Async : Clause<"async"> {
-  let flangClass = "std::optional<ScalarIntExpr>";
-}
-
 // 2.7.11
 def ACCC_Attach : Clause<"attach"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.15.1
 def ACCC_Bind : Clause<"bind"> {
-  let flangClass = "Name";
+  let flangClassValue = "Name";
 }
 
 // 2.12
@@ -55,72 +57,74 @@ def ACCC_Capture : Clause<"capture"> {
 
 // 2.9.1
 def ACCC_Collapse : Clause<"collapse"> {
-  let flangClass = "ScalarIntConstantExpr";
+  let flangClassValue = "ScalarIntConstantExpr";
 }
 
 // 2.7.5
 def ACCC_Copy : Clause<"copy"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 // 2.7.6
 def ACCC_Copyin : Clause<"copyin"> {
-  let flangClass = "AccObjectListWithModifier";
+  let flangClassValue = "AccObjectListWithModifier";
 }
 
 // 2.7.7
 def ACCC_Copyout : Clause<"copyout"> {
-  let flangClass = "AccObjectListWithModifier";
+  let flangClassValue = "AccObjectListWithModifier";
 }
 
 // 2.7.8
 def ACCC_Create : Clause<"create"> {
-  let flangClass = "AccObjectListWithModifier";
+  let flangClassValue = "AccObjectListWithModifier";
 }
 
 // 2.5.14
 def ACCC_Default : Clause<"default"> {
-  let flangClass = "AccDefaultClause";
+  let flangClassValue = "AccDefaultClause";
 }
 
 // 2.4.12
 def ACCC_DefaultAsync : Clause<"default_async"> {
-  let flangClass = "ScalarIntExpr";
+  let flangClassValue = "ScalarIntExpr";
 }
 
 // 2.7.10
 def ACCC_Delete : Clause<"delete"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.7.12
 def ACCC_Detach : Clause<"detach"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.14.4
 def ACCC_Device : Clause<"device"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.14.1
-def ACCC_DeviceNum : Clause<"devicenum">  {
-  let flangClass = "ScalarIntConstantExpr";
+def ACCC_DeviceNum : Clause<"device_num">  {
+  let flangClassValue = "ScalarIntExpr";
 }
 
 // 2.7.3
 def ACCC_DevicePtr : Clause<"deviceptr"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.13
 def ACCC_DeviceResident : Clause<"device_resident"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.4
 def ACCC_DeviceType : Clause<"device_type"> {
-  // (DeviceType, "*"
-  let flangClass = "std::optional<std::list<Name>>";
+  let flangClassValue = "ScalarIntExpr";
+  let defaultValue = "*";
+  let isValueOptional = true;
+  let isValueList = true;
 }
 
 // 2.6.6
@@ -128,22 +132,23 @@ def ACCC_Finalize : Clause<"finalize"> {}
 
 // 2.5.12
 def ACCC_FirstPrivate : Clause<"firstprivate"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.9.2
 def ACCC_Gang : Clause<"gang"> {
-  let flangClass = "std::optional<AccGangArgument>";
+  let flangClassValue = "AccGangArgument";
+  let isValueOptional = true;
 }
 
 // 2.14.4
 def ACCC_Host : Clause<"host"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.5.4
 def ACCC_If : Clause <"if"> {
-  let flangClass = "ScalarLogicalExpr";
+  let flangClassValue = "ScalarLogicalExpr";
 }
 
 // 2.14.4
@@ -154,12 +159,12 @@ def ACCC_Independent : Clause<"independent"> {}
 
 // 2.13
 def ACCC_Link : Clause<"link"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.7.9
 def ACCC_NoCreate : Clause<"no_create"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.15.1
@@ -167,32 +172,32 @@ def ACCC_NoHost : Clause<"nohost"> {}
 
 // 2.5.8
 def ACCC_NumGangs : Clause<"num_gangs"> {
-  let flangClass = "ScalarIntExpr";
+  let flangClassValue = "ScalarIntExpr";
 }
 
 // 2.5.9
 def ACCC_NumWorkers : Clause<"num_workers"> {
-  let flangClass = "ScalarIntExpr";
+  let flangClassValue = "ScalarIntExpr";
 }
 
 // 2.7.4
 def ACCC_Present : Clause<"present"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.5.11
 def ACCC_Private : Clause<"private"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.9.7
 def ACCC_Tile : Clause <"tile"> {
-  let flangClass = "AccSizeExprList";
+  let flangClassValue = "AccTileExprList";
 }
 
 // 2.8.1
 def ACCC_UseDevice : Clause <"use_device"> {
-  let flangClass = "AccObjectList";
+  let flangClassValue = "AccObjectList";
 }
 
 // 2.12
@@ -200,12 +205,13 @@ def ACCC_Read : Clause<"read"> {}
 
 // 2.5.13
 def ACCC_Reduction : Clause<"reduction"> {
-  let flangClass = "AccObjectListWithReduction";
+  let flangClassValue = "AccObjectListWithReduction";
 }
 
 // 2.5.5
 def ACCC_Self : Clause<"self"> {
-  let flangClass = "std::optional<ScalarLogicalExpr>";
+  let flangClassValue = "ScalarLogicalExpr";
+  let isValueOptional = true;
 }
 
 // 2.9.5
@@ -213,29 +219,32 @@ def ACCC_Seq : Clause<"seq"> {}
 
 // 2.9.4
 def ACCC_Vector : Clause<"vector"> {
-  let flangClass = "std::optional<ScalarIntExpr>";
+  let flangClassValue = "ScalarIntExpr";
+  let isValueOptional = true;
 }
 
 // 2.5.10
 def ACCC_VectorLength : Clause<"vector_length"> {
-  let flangClass = "ScalarIntExpr";
+  let flangClassValue = "ScalarIntExpr";
 }
 
 // 2.16.2
 def ACCC_Wait : Clause<"wait"> {
-  let flangClass = "std::optional<AccWaitArgument>";
+  let flangClassValue = "AccWaitArgument";
+  let isValueOptional = true;
 }
 
 // 2.9.3
 def ACCC_Worker: Clause<"worker"> {
-  let flangClass = "std::optional<ScalarIntExpr>";
+  let flangClassValue = "ScalarIntExpr";
+  let isValueOptional = true;
 }
 
 // 2.12
 def ACCC_Write : Clause<"write"> {}
 
 def ACCC_Unknown : Clause<"unknown"> {
-  let isDefault = 1;
+  let isDefault = true;
 }
 
 //===----------------------------------------------------------------------===//
@@ -406,9 +415,15 @@ def ACC_Routine : Directive<"routine"> {
 // 2.14.3
 def ACC_Set : Directive<"set"> {
   let allowedOnceClauses = [
+    VersionedClause<ACCC_DefaultAsync>,
+    VersionedClause<ACCC_DeviceNum>,
+    VersionedClause<ACCC_DeviceType>,
     VersionedClause<ACCC_If>
   ];
   let requiredClauses = [
+    // The three following clauses are also in allowedOnceClauses list due to
+    // restriction 2255 - Two instances of the same clause may not appear on the
+    // same directive.
     VersionedClause<ACCC_DefaultAsync>,
     VersionedClause<ACCC_DeviceNum>,
     VersionedClause<ACCC_DeviceType>
@@ -508,7 +523,6 @@ def ACC_KernelsLoop : Directive<"kernels loop"> {
     VersionedClause<ACCC_Default>,
     VersionedClause<ACCC_Gang>,
     VersionedClause<ACCC_If>,
-    VersionedClause<ACCC_Independent>,
     VersionedClause<ACCC_NumGangs>,
     VersionedClause<ACCC_NumWorkers>,
     VersionedClause<ACCC_Reduction>,
@@ -600,5 +614,5 @@ def ACC_SerialLoop : Directive<"serial loop"> {
 }
 
 def ACC_Unknown : Directive<"unknown"> {
-  let isDefault = 1;
+  let isDefault = true;
 }
